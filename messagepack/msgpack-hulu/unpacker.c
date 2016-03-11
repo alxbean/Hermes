@@ -6,16 +6,13 @@
  ************************************************************************/
 
 #include <stdio.h>
+#include "parse_msg.h"
 
  struct Object{
      char *buffer;
      int offset;
      int len;
  };
-
-struct Object GetNextObject(struct Object *obj){
-    
-}
 
 int which(char *head){
     if ( (*head & 0x80) == 0){
