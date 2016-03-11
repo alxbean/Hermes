@@ -27,21 +27,21 @@ char *parseString(_byte *buf, int *off){
     }
     
     switch(head & 0xFF){
-        case  0xd9: 
+        case  0xD9: 
             len = *(buf+1);
             printf("len: %d\n", len);
             str = (char *) malloc(sizeof(char)*len);
             memcpy(str, (buf + 2), len);
             off += len + 1;
             return str;
-        case 0xda:
+        case 0xDA:
             len = (*(buf+1)<<8) + *(buf+2);
             printf("len: %d\n", len);
             str = (char *) malloc(sizeof(char)*len);
             memcpy(str, (buf+3), len);
             off += len + 1;
             return str;
-        case 0xdb:
+        case 0xDB:
             len = (*(buf + 1)<<24) + (*(buf + 2)<<16) + (*(buf + 3)<<8) + *(buf + 4);
             printf("len: %d\n", len);
             str = (char *) malloc(sizeof(char)*len);
@@ -51,6 +51,14 @@ char *parseString(_byte *buf, int *off){
     }
 
     return str;
+}
+
+int parseBool(_byte *buf, int *off){
+    *off +=  1;
+    if(*buf == 0xC2)
+        return 0;
+    if(*buf == 0xC3)
+        return 1;
 }
 
 
