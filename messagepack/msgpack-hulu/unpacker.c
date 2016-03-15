@@ -14,7 +14,7 @@
      int len;
  };
 
-int which(char *head){
+int which(char *head){/*{{{*/
     if ( (*head & 0x80) == 0){
         printf("positive fixint\n");
         return 1;
@@ -111,7 +111,7 @@ int which(char *head){
             return 0;
     }
 
-}
+}/*}}}*/
 
 void unSerializer(char *buffer){
     if(NULL == buffer){
