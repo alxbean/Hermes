@@ -73,14 +73,16 @@ void ParseEXT(Context *ctx){/*{{{*/
 
         while((*off - start) < len){
             Object *new_node = NewObject();
-            if(0 == i)
+            if(*off == start)
                 parent->child = new_node;
             else
                 node->next = new_node;
             ctx->node = new_node;
-            ParseDispatcher(ctx);//key
             ctx->node->isName = 1; 
+            ParseDispatcher(ctx);//key
+            ctx->node->isName = 0; 
             ParseDispatcher(ctx);//value
+            node = new_node;
         }
     }
     else{
@@ -194,8 +196,10 @@ void ParseString(Context *ctx){/*{{{*/
         *off += (len + 1);
         if(ctx->node->isName == 0){
             ctx->node->str_val = str;
+            return;
         }else{
             ctx->node->name = str;
+            return;
         }
     }
     
@@ -208,8 +212,10 @@ void ParseString(Context *ctx){/*{{{*/
             *off += (len + 1);
             if(ctx->node->isName == 0){
                 ctx->node->str_val = str;
+                return;
             }else{
                 ctx->node->name = str;
+                return;
             }
         case 0xDA:
             len = (*(index + 1)<<8) + *(index+2);
@@ -219,8 +225,10 @@ void ParseString(Context *ctx){/*{{{*/
             *off += (len + 1);
             if(ctx->node->isName == 0){
                 ctx->node->str_val = str;
+                return;
             }else{
                 ctx->node->name = str;
+                return;
             }
         case 0xDB:
             len = (*(index + 1)<<24) + (*(index + 2)<<16) + (*(index + 3)<<8) + *(index + 4);
@@ -230,8 +238,10 @@ void ParseString(Context *ctx){/*{{{*/
             *off += (len+ 1);
             if(ctx->node->isName == 0){
                 ctx->node->str_val = str;
+                return;
             }else{
                 ctx->node->name = str;
+                return;
             }
     }
 }/*}}}*/
@@ -274,12 +284,14 @@ void ParseInteger(Context *ctx){/*{{{*/
        int val = (*index) & 0x7F; 
        *off += 1;
        ctx->node->int_val=val;
+       return;
     }
 
     if( (head & 0xE0) == 0xE0){
         int val = (*index) & 0x1F;
         *off += 1;
         ctx->node->int_val= -val;
+       return;
     }
 
     switch(head){
@@ -288,18 +300,21 @@ void ParseInteger(Context *ctx){/*{{{*/
             printf("val: %u\n", uval_8);
             *off += 2;
             ctx->node->int_val= uval_8;
+            return;
             
         case 0xCD:
             uval_16 = (unsigned int)(*(index + 1) << 8) + *(index + 2);
             printf("val: %u\n", uval_16);
             *off += 3;
             ctx->node->int_val= uval_16;
+            return;
             
         case 0xCE:
             uval_32 = (unsigned int)((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
             printf("val: %u\n", uval_32);
             *off += 5;
             ctx->node->int_val= uval_32;
+            return;
 
         case 0xCF:
             tmp = *(index + 1);
@@ -310,24 +325,28 @@ void ParseInteger(Context *ctx){/*{{{*/
             printf("val: %llu\n", uval_64);
             *off += 9;
             ctx->node->int_val= uval_64;
+            return;
 
         case 0xD0:
             val_8 = (int) *(index + 1);
             printf("val: %d\n", uval_8);
             *off += 2;
             ctx->node->int_val= val_8;
+            return;
 
         case 0xD1:
             val_16 = (int) ((*(index + 1) << 8) + *(index + 2));
             printf("val: %d\n", val_16);
             *off += 3;
             ctx->node->int_val= val_16;
+            return;
 
         case 0xD2:
             val_32 = (int) ((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
             printf("val: %u\n", val_32);
             *off += 5;
             ctx->node->int_val= val_32;
+            return;
 
         case 0xD3:
             tmp = *(index + 1);
@@ -338,6 +357,7 @@ void ParseInteger(Context *ctx){/*{{{*/
             printf("val: %llu\n", val_64);
             *off += 9;
             ctx->node->int_val= val_64;
+            return;
     }
 }/*}}}*/
 
@@ -359,6 +379,7 @@ void ParseFloat(Context *ctx){/*{{{*/
         }
         *off += 5;
         ctx->node->float_val = float_union.float_tmp;
+        return;
     }
     if(head == 0xCB){
         int i  = 0;
@@ -367,6 +388,7 @@ void ParseFloat(Context *ctx){/*{{{*/
         }
         *off += 9;
         ctx->node->float_val = float_union.double_tmp;
+        return;
     }
 }/*}}}*/
 
@@ -377,71 +399,105 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
         ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
         ParseInteger(ctx);
         printf("positive fixint\n");
+        return;
     }
     if( (head & 0xE0) == 0xE0){
         printf("negative fixint\n");
+        return;
     }
     if( (head & 0xE0) == 0xA0){
+        ParseString(ctx);
         printf("fixRaw\n");
+        return;
     }
     if( (head & 0xF0) == 0x90){
         ctx->node->type = MSGPACK_OBJECT_ARRAY;
         ParseArray(ctx);
         printf("fixarray\n");
+        return;
     }
     if( (head & 0xf0) == 0x80){
         printf("FixMap\n");
+        return;
     }
 
     switch(head & 0xFF){
         case 0xC0:
             printf("NIL\n");
+            return;
         case 0xC2:
             printf("boolean false\n");
+            return;
         case 0xC3:
             printf("boolean true\n");
+            return;
         case 0xCA:
+            ParseFloat(ctx);
             printf("float\n");
+            return;
         case 0xCB:
+            ParseFloat(ctx);
             printf("DOUBLE\n");
+            return;
         case 0xCC:
             printf("unsigned int 8\n");
+            return;
         case 0xCD:
             printf("unsigned int 16\n");
+            return;
         case 0xCE:
             printf("unsigned int 32\n");
+            return;
         case 0xCF:
             printf("unsigned int 64\n"); 
+            return;
         case 0xD0:
             printf("signed int 8\n");
+            return;
         case 0xD1:
             printf("signed int 16\n");
+            return;
         case 0xD2:
             printf("signed int 32\n");
+            return;
         case 0xD3:
             printf("signed int 64\n");
+            return;
         case 0xC4:
             printf("bin 8\n");
+            return;
         case 0xC5:
             printf("bin 16\n");
+            return;
         case 0xC6:
             printf("bin 32\n");
+            return;
         case 0xD9:
             ctx->node->type = MSGPACK_OBJECT_STR;
             ParseString(ctx);
             printf("str8\n");
+            return;
         case 0xDA:
             printf("raw 16\n");
+            return;
         case 0xDB:
             printf("raw 32\n");
+            return;
         case 0xDC:
             printf("array 16\n");
+            return;
         case 0xDD:
             printf("array 32\n");
+            return;
         case 0xDE:
             printf("map 16\n");
+            return;
         case 0xDF:
             printf("map 32\n");
+            return;
+        case 0xC7:
+            ParseEXT(ctx);
+            printf("ext 8\n");
         default:
             printf("not found\n");
     }
@@ -457,8 +513,12 @@ int main(){
     //printf("%s\n", ret_str);
     Context *ctx = (Context *)calloc(1, sizeof(Context));
     ctx->root = NewObject(); 
-    ctx->buf = array;
+    ctx->node = ctx->root;
+    //ctx->buf = array;
+    //ctx->buf = float_val;
+    ctx->buf = ext;
     ParseDispatcher(ctx);
+
 
     //ctx->buf = float_val;
     //printf("%f\n", ParseFloat(ctx));
