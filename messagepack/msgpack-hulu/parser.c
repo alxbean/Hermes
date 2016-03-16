@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define STR_LEN 100
+
 typedef enum {
     MSGPACK_OBJECT_NIL                  = 0x00,
     MSGPACK_OBJECT_BOOLEAN              = 0x01,
@@ -271,7 +273,7 @@ void *ParseNil(Context *ctx){/*{{{*/
 void ParseInteger(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     string_t str_int = NULL; 
-    char tmp_str[100] = {0};
+    char tmp_str[STR_LEN] = {0};
     int str_len = 0;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
@@ -518,12 +520,18 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
 
     switch(head & 0xFF){
         case 0xC0:
+            ctx->node->type = MSGPACK_OBJECT_NIL;
+            ParseNil(ctx);
             printf("NIL\n");
             return;
         case 0xC2:
+            ctx->node->type = MSGPACK_OBJECT_BOOLEAN;
+            ParseBool(ctx);
             printf("boolean false\n");
             return;
         case 0xC3:
+            ctx->node->type = MSGPACK_OBJECT_BOOLEAN;
+            ParseBool(ctx);
             printf("boolean true\n");
             return;
         case 0xCA:
@@ -537,36 +545,58 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
             printf("DOUBLE\n");
             return;
         case 0xCC:
+            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ParseInteger(ctx);
             printf("unsigned int 8\n");
             return;
         case 0xCD:
+            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ParseInteger(ctx);
             printf("unsigned int 16\n");
             return;
         case 0xCE:
+            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ParseInteger(ctx);
             printf("unsigned int 32\n");
             return;
         case 0xCF:
+            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ParseInteger(ctx);
             printf("unsigned int 64\n"); 
             return;
         case 0xD0:
+            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ParseInteger(ctx);
             printf("signed int 8\n");
             return;
         case 0xD1:
+            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ParseInteger(ctx);
             printf("signed int 16\n");
             return;
         case 0xD2:
+            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ParseInteger(ctx);
             printf("signed int 32\n");
             return;
         case 0xD3:
+            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ParseInteger(ctx);
             printf("signed int 64\n");
             return;
         case 0xC4:
+            ctx->node->type = MSGPACK_OBJECT_BIN;
+            ParseBin(ctx);
             printf("bin 8\n");
             return;
         case 0xC5:
+            ctx->node->type = MSGPACK_OBJECT_BIN;
+            ParseBin(ctx);
             printf("bin 16\n");
             return;
         case 0xC6:
+            ctx->node->type = MSGPACK_OBJECT_BIN;
+            ParseBin(ctx);
             printf("bin 32\n");
             return;
         case 0xD9:
@@ -575,15 +605,23 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
             printf("str8\n");
             return;
         case 0xDA:
-            printf("raw 16\n");
+            ctx->node->type = MSGPACK_OBJECT_STR;
+            ParseString(ctx);
+            printf("str 16\n");
             return;
         case 0xDB:
-            printf("raw 32\n");
+            ctx->node->type = MSGPACK_OBJECT_STR;
+            ParseString(ctx);
+            printf("str 32\n");
             return;
         case 0xDC:
+            ctx->node->type = MSGPACK_OBJECT_ARRAY;
+            ParseArray(ctx);
             printf("array 16\n");
             return;
         case 0xDD:
+            ctx->node->type = MSGPACK_OBJECT_ARRAY;
+            ParseArray(ctx);
             printf("array 32\n");
             return;
         case 0xDE:
@@ -618,9 +656,8 @@ int main(){
     //ctx->buf = array;
     //ctx->buf = float_val;
     //ctx->buf = ext;
-    ctx->buf = map;
+    ctx->buf = float_val;
     ParseDispatcher(ctx);
-
 
     //ctx->buf = float_val;
     //printf("%f\n", ParseFloat(ctx));
