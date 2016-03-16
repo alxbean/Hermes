@@ -28,7 +28,9 @@ int main(void) {
         msgpack_pack_bin_body(pk, "Hello", 5);
         msgpack_pack_bin(pk, 11);
         msgpack_pack_bin_body(pk, "MessagePack", 11);
+        msgpack_pack_float(pk, 1);
         print(buffer->data, buffer->size);
+        
 
         /* deserializes it. */
         msgpack_unpacked msg;
