@@ -83,6 +83,45 @@ void ParseEXT(Context *ctx){/*{{{*/
             ParseDispatcher(ctx);//key
             ctx->node->isKey = 0; 
             ParseDispatcher(ctx);//value
+            ctx->node = new_node;
+        }
+    }else if(head == 0xC8){
+        len = (*(index + 1) << 8) + *(index + 2); 
+        *off += 4;
+        int start = *off;
+        Object *parent = ctx->node;
+
+        while((*off - start) < len){
+            Object *new_node = NewObject();
+            if(*off == start)
+                parent->child = new_node;
+            else
+                ctx->node->next = new_node;
+            ctx->node = new_node;
+            ctx->node->isKey = 1; 
+            ParseDispatcher(ctx);//key
+            ctx->node->isKey = 0; 
+            ParseDispatcher(ctx);//value
+            ctx->node = new_node;
+        }
+    }else if(head == 0xC9){
+        len = (*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4); 
+        *off += 6;
+        int start = *off;
+        Object *parent = ctx->node;
+
+        while((*off - start) < len){
+            Object *new_node = NewObject();
+            if(*off == start)
+                parent->child = new_node;
+            else
+                ctx->node->next = new_node;
+            ctx->node = new_node;
+            ctx->node->isKey = 1; 
+            ParseDispatcher(ctx);//key
+            ctx->node->isKey = 0; 
+            ParseDispatcher(ctx);//value
+            ctx->node = new_node;
         }
     }
     else{
@@ -112,6 +151,7 @@ void ParseMap(Context *ctx){/*{{{*/
             ParseDispatcher(ctx);//key
             ctx->node->isKey = 0;
             ParseDispatcher(ctx);//value
+            ctx->node = new_node;
         }
     }
 
@@ -142,6 +182,7 @@ void ParseArray(Context *ctx){/*{{{*/
                 ctx->node->next = new_node;
             ctx->node = new_node;
             ParseDispatcher(ctx);
+            ctx->node = new_node;
         }
     }
     if(head == 0xDC){
@@ -477,7 +518,7 @@ void ParseFloat(Context *ctx){/*{{{*/
     }
     if(head == 0xCB){
         int i  = 0;
-        for(i = 1; i<=8; i++){
+        for(i = 0; i < 8; i++){
             float_union.double_buf[i] = *(index + 8 - i);
         }
         *off += 9;
@@ -636,30 +677,51 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
             ctx->node->type = MSGPACK_OBJECT_EXT;
             ParseEXT(ctx);
             printf("ext 8\n");
+            return;
+        case 0xC8:
+            ctx->node->type = MSGPACK_OBJECT_EXT;
+            ParseEXT(ctx);
+            printf("ext 8\n");
+            return;
+        case 0xC9:
+            ctx->node->type = MSGPACK_OBJECT_EXT;
+            ParseEXT(ctx);
+            printf("ext 8\n");
+            return;
         default:
             printf("not found\n");
     }
 }/*}}}*/
 
-int main(){
-    ubyte_t ext[] = {0xC7, 0x11, 0x00, 0xA4, 0x6E, 0x61, 0x6D, 0x65, 0xA6, 0xE5, 0x91, 0xB5, 0xE5, 0x91, 0xB5, 0xA3, 0x61, 0x67, 0x65, 0x0A};
-    ubyte_t str[] = {0xD9, 0x29, 0x61, 0x62, 0x63, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73,  0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73};
-    ubyte_t array[] = {0x93, 0x01, 0x02, 0x03};
-    ubyte_t float_val[] = {0xCA, 0x43, 0x5C, 0x00, 0x00};
-    ubyte_t map[] = {0x82, 0x02, 0xA5, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x03, 0xA5, 0x77, 0x6F, 0x72, 0x6C, 0x64};
-    
-    //char *ret_str = parseString(str, &off);
-    //printf("%s\n", ret_str);
+Object * MSGPackParser(ubyte_t *buf){
     Context *ctx = (Context *)calloc(1, sizeof(Context));
     ctx->root = NewObject(); 
     ctx->node = ctx->root;
-    //ctx->buf = array;
-    //ctx->buf = float_val;
-    //ctx->buf = ext;
-    ctx->buf = float_val;
+    ctx->buf = buf;
     ParseDispatcher(ctx);
 
-    //ctx->buf = float_val;
-    //printf("%f\n", ParseFloat(ctx));
+    return ctx->root;
 }
+
+//int main(){
+//    ubyte_t ext[] = {0xC7, 0x11, 0x00, 0xA4, 0x6E, 0x61, 0x6D, 0x65, 0xA6, 0xE5, 0x91, 0xB5, 0xE5, 0x91, 0xB5, 0xA3, 0x61, 0x67, 0x65, 0x0A};
+//    ubyte_t str[] = {0xD9, 0x29, 0x61, 0x62, 0x63, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73,  0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73};
+//    ubyte_t array[] = {0x93, 0x01, 0x02, 0x03};
+//    ubyte_t float_val[] = {0xCA, 0x43, 0x5C, 0x00, 0x00};
+//    ubyte_t map[] = {0x82, 0x02, 0xA5, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x03, 0xA5, 0x77, 0x6F, 0x72, 0x6C, 0x64};
+//    
+//    //char *ret_str = parseString(str, &off);
+//    //printf("%s\n", ret_str);
+//    Context *ctx = (Context *)calloc(1, sizeof(Context));
+//    ctx->root = NewObject(); 
+//    ctx->node = ctx->root;
+//    //ctx->buf = array;
+//    //ctx->buf = float_val;
+//    //ctx->buf = ext;
+//    ctx->buf = float_val;
+//    ParseDispatcher(ctx);
+//
+//    //ctx->buf = float_val;
+//    //printf("%f\n", ParseFloat(ctx));
+//}
 
