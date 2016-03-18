@@ -8,27 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <msgpack.h>
 
 #define STR_LEN 100
 
-typedef enum {
-    MSGPACK_OBJECT_NIL                  = 0x00,
-    MSGPACK_OBJECT_BOOLEAN              = 0x01,
-    MSGPACK_OBJECT_POSITIVE_INTEGER     = 0x02,
-    MSGPACK_OBJECT_NEGATIVE_INTEGER     = 0x03,
-    MSGPACK_OBJECT_FLOAT                = 0x04,
-#if defined(MSGPACK_USE_LEGACY_NAME_AS_FLOAT)
-    MSGPACK_OBJECT_DOUBLE               = MSGPACK_OBJECT_FLOAT, /* obsolete */
-#endif /* MSGPACK_USE_LEGACY_NAME_AS_FLOAT */
-    MSGPACK_OBJECT_STR                  = 0x05,
-    MSGPACK_OBJECT_ARRAY                = 0x06,
-    MSGPACK_OBJECT_MAP                  = 0x07,
-    MSGPACK_OBJECT_BIN                  = 0x08,
-    MSGPACK_OBJECT_EXT                  = 0x09
-} msgpack_object_type;
-
 typedef unsigned char ubyte_t ;
-typedef char * string_t;
+typedef char *string_t;
 typedef int bool_t;
 typedef struct Object{
     bool_t isKey;
@@ -38,6 +23,7 @@ typedef struct Object{
     string_t str_val;
     int int_val;
     float float_val;
+    ubyte_t *bin_val;
     string_t name;
 } Object;
 
@@ -193,7 +179,7 @@ void ParseArray(Context *ctx){/*{{{*/
     }
 }/*}}}*/
 
-ubyte_t *ParseBin(Context *ctx){/*{{{*/
+void ParseBin(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
@@ -205,26 +191,24 @@ ubyte_t *ParseBin(Context *ctx){/*{{{*/
             len = *(index+1);
             printf("len: %d\n", len);
             bin = (ubyte_t *) malloc(sizeof(ubyte_t)*len);
-            memcpy(bin, (index+ 2), len);
+            memcpy(ctx->node->bin_val, (index+ 2), len);
             *off += (len + 1);
-            return bin;
+            return;
         case 0xC5:
             len = (*(index+1)<<8) + *(index+2);
             printf("len: %d\n", len);
             bin = (ubyte_t *) malloc(sizeof(ubyte_t)*len);
-            memcpy(bin, (index+3), len);
+            memcpy(ctx->node->bin_val, (index+3), len);
             *off += (len + 1);
-            return bin;
+            return;
         case 0xC6:
             len = (*(index + 1)<<24) + (*(index + 2)<<16) + (*(index + 3)<<8) + *(index + 4);
             printf("len: %d\n", len);
             bin = (ubyte_t*) malloc(sizeof(ubyte_t)*len);
-            memcpy(bin, (index+5), len);
+            memcpy(ctx->node->bin_val, (index+5), len);
             *off += (len+ 1);
-            return bin;
+            return;
     }
-
-    return bin;
 }/*}}}*/
 
 void ParseString(Context *ctx){/*{{{*/
@@ -531,12 +515,14 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     ubyte_t head = *index;
     if ( (head & 0x80) == 0){
-        ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+        ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
         ParseInteger(ctx);
         printf("positive fixint\n");
         return;
     }
     if( (head & 0xE0) == 0xE0){
+        ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+        ParseInteger(ctx);
         printf("negative fixint\n");
         return;
     }
@@ -586,42 +572,42 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
             printf("DOUBLE\n");
             return;
         case 0xCC:
-            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
             ParseInteger(ctx);
             printf("unsigned int 8\n");
             return;
         case 0xCD:
-            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
             ParseInteger(ctx);
             printf("unsigned int 16\n");
             return;
         case 0xCE:
-            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
             ParseInteger(ctx);
             printf("unsigned int 32\n");
             return;
         case 0xCF:
-            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
             ParseInteger(ctx);
             printf("unsigned int 64\n"); 
             return;
         case 0xD0:
-            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
             ParseInteger(ctx);
             printf("signed int 8\n");
             return;
         case 0xD1:
-            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
             ParseInteger(ctx);
             printf("signed int 16\n");
             return;
         case 0xD2:
-            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
             ParseInteger(ctx);
             printf("signed int 32\n");
             return;
         case 0xD3:
-            ctx->node->type = MSGPACK_OBJECT_NEGATIVE_INTEGER;
+            ctx->node->type = MSGPACK_OBJECT_POSITIVE_INTEGER;
             ParseInteger(ctx);
             printf("signed int 64\n");
             return;
@@ -718,7 +704,7 @@ Object * MSGPackParser(ubyte_t *buf){
 //    //ctx->buf = array;
 //    //ctx->buf = float_val;
 //    //ctx->buf = ext;
-//    ctx->buf = float_val;
+//    ctx->buf = ext;
 //    ParseDispatcher(ctx);
 //
 //    //ctx->buf = float_val;
