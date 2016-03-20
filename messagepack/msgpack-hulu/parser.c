@@ -1,38 +1,13 @@
 /*************************************************************************
-    > File Name: parse_msg.c
+    > File Name: parse.c
     > Author: shuaixiang
     > Mail: shuaixiang@yuewen.com
     > Created Time: Fri 11 Mar 2016 03:24:11 AM UTC
  ************************************************************************/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <msgpack.h>
+#include "include/parser.h"
+#include "include/msghulu_define.h"
 
 #define STR_LEN 100
-
-typedef unsigned char ubyte_t ;
-typedef char *string_t;
-typedef int bool_t;
-typedef struct Object{
-    bool_t isKey;
-    msgpack_object_type type;
-    struct Object *next;
-    struct Object *child;
-    string_t str_val;
-    int int_val;
-    float float_val;
-    ubyte_t *bin_val;
-    string_t name;
-} Object;
-
-typedef struct Context{
-    Object *root;
-    Object *node;
-    ubyte_t *buf;
-    int off;
-}Context; 
 
 Object * NewObject(){
     Object *new_node = (Object *)calloc(1, sizeof(Object));
@@ -40,11 +15,8 @@ Object * NewObject(){
         perror("NewObject:");
         return NULL;
     }
-
     return new_node;
 }
-
-void ParseDispatcher(Context *ctx);
 
 void ParseEXT(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
@@ -65,9 +37,9 @@ void ParseEXT(Context *ctx){/*{{{*/
             else
                 ctx->node->next = new_node;
             ctx->node = new_node;
-            ctx->node->isKey = 1; 
+            ctx->node->isKey = TRUE; 
             ParseDispatcher(ctx);//key
-            ctx->node->isKey = 0; 
+            ctx->node->isKey = FALSE; 
             ParseDispatcher(ctx);//value
             ctx->node = new_node;
         }
@@ -84,9 +56,9 @@ void ParseEXT(Context *ctx){/*{{{*/
             else
                 ctx->node->next = new_node;
             ctx->node = new_node;
-            ctx->node->isKey = 1; 
+            ctx->node->isKey = TRUE; 
             ParseDispatcher(ctx);//key
-            ctx->node->isKey = 0; 
+            ctx->node->isKey = FALSE; 
             ParseDispatcher(ctx);//value
             ctx->node = new_node;
         }
@@ -103,9 +75,9 @@ void ParseEXT(Context *ctx){/*{{{*/
             else
                 ctx->node->next = new_node;
             ctx->node = new_node;
-            ctx->node->isKey = 1; 
+            ctx->node->isKey = TRUE; 
             ParseDispatcher(ctx);//key
-            ctx->node->isKey = 0; 
+            ctx->node->isKey = FALSE; 
             ParseDispatcher(ctx);//value
             ctx->node = new_node;
         }
@@ -133,9 +105,9 @@ void ParseMap(Context *ctx){/*{{{*/
             else
                 ctx->node->next = new_node;
             ctx->node = new_node;
-            ctx->node->isKey = 1;
+            ctx->node->isKey = TRUE;
             ParseDispatcher(ctx);//key
-            ctx->node->isKey = 0;
+            ctx->node->isKey = FALSE;
             ParseDispatcher(ctx);//value
             ctx->node = new_node;
         }
@@ -191,23 +163,26 @@ void ParseBin(Context *ctx){/*{{{*/
             len = *(index+1);
             printf("len: %d\n", len);
             bin = (ubyte_t *) malloc(sizeof(ubyte_t)*len);
-            memcpy(ctx->node->bin_val, (index+ 2), len);
+            memcpy(bin, (index+ 2), len);
+            ctx->node->value.bin_val = bin;
             *off += (len + 1);
-            return;
+            break;
         case 0xC5:
             len = (*(index+1)<<8) + *(index+2);
             printf("len: %d\n", len);
             bin = (ubyte_t *) malloc(sizeof(ubyte_t)*len);
-            memcpy(ctx->node->bin_val, (index+3), len);
+            memcpy(bin, (index+3), len);
+            ctx->node->value.bin_val = bin;
             *off += (len + 1);
-            return;
+            break;
         case 0xC6:
             len = (*(index + 1)<<24) + (*(index + 2)<<16) + (*(index + 3)<<8) + *(index + 4);
             printf("len: %d\n", len);
             bin = (ubyte_t*) malloc(sizeof(ubyte_t)*len);
-            memcpy(ctx->node->bin_val, (index+5), len);
+            memcpy(bin, (index+5), len);
+            ctx->node->value.bin_val = bin;
             *off += (len+ 1);
-            return;
+            break;
     }
 }/*}}}*/
 
@@ -224,10 +199,10 @@ void ParseString(Context *ctx){/*{{{*/
         str = (char *) malloc(sizeof(char)*len);
         memcpy(str, (index + 1), len);
         *off += (len + 1);
-        if(ctx->node->isKey == 0){
-            ctx->node->str_val = str;
+        if(ctx->node->isKey == FALSE){
+            ctx->node->value.str_val = str;
         }else{
-            ctx->node->name = str;
+            ctx->node->key = str;
         }
         return;
     }
@@ -239,10 +214,10 @@ void ParseString(Context *ctx){/*{{{*/
             str = (char *) malloc(sizeof(char)*len);
             memcpy(str, (index + 2), len);
             *off += (len + 1);
-            if(ctx->node->isKey == 0){
-                ctx->node->str_val = str;
+            if(ctx->node->isKey == FALSE){
+                ctx->node->value.str_val = str;
             }else{
-                ctx->node->name = str;
+                ctx->node->key= str;
             }
             return;
         case 0xDA:
@@ -251,10 +226,10 @@ void ParseString(Context *ctx){/*{{{*/
             str = (char *) malloc(sizeof(char)*len);
             memcpy(str, (index + 3), len);
             *off += (len + 1);
-            if(ctx->node->isKey == 0){
-                ctx->node->str_val = str;
+            if(ctx->node->isKey == FALSE){
+                ctx->node->value.str_val = str;
             }else{
-                ctx->node->name = str;
+                ctx->node->key= str;
             }
             return;
         case 0xDB:
@@ -263,26 +238,24 @@ void ParseString(Context *ctx){/*{{{*/
             str = (char *) malloc(sizeof(char)*len);
             memcpy(str, (index + 5), len);
             *off += (len+ 1);
-            if(ctx->node->isKey == 0){
-                ctx->node->str_val = str;
+            if(ctx->node->isKey == FALSE){
+                ctx->node->value.str_val = str;
             }else{
-                ctx->node->name = str;
+                ctx->node->key = str;
             }
             return;
     }
 }/*}}}*/
 
-int ParseBool(Context *ctx){/*{{{*/
+void ParseBool(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index;
     *off +=  1;
     if(head == 0xC2)
-        return 0;
+        ctx->node->value.bool_val = TRUE;
     else if(head == 0xC3)
-        return 1;
-    else
-        return -1;
+        ctx->node->value.bool_val = FALSE;
 }/*}}}*/
 
 void *ParseNil(Context *ctx){/*{{{*/
@@ -302,181 +275,188 @@ void ParseInteger(Context *ctx){/*{{{*/
     int str_len = 0;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
-    unsigned int uval_8 = 0, uval_16 = 0, uval_32 = 0;
-    unsigned long long uval_64 = 0;
-    signed int val_8 = 0, val_16 = 0, val_32 = 0;
-    long long val_64 = 0;
-    unsigned long long tmp = 0;
     int i = 0;
     
     if( (head & 0x80) == 0){
-        int val = (*index) & 0x7F; 
+        uint8_t val = (*index) & 0x7F; 
         *off += 1;
-        if(ctx->node->isKey == 0){
-            ctx->node->int_val=val;
+        if(ctx->node->isKey == FALSE){
+            ctx->node->value.uint8_val = val;
         }
         else{
             sprintf(tmp_str, "%d", val);
             str_len = strlen(tmp_str);
             str_int = (string_t) malloc(sizeof(char)*str_len);
             memcpy(str_int, tmp_str, str_len);
-            ctx->node->name = str_int;
+            ctx->node->key = str_int;
         }
         return;
     }
 
     if( (head & 0xE0) == 0xE0){
-        int val = (*index) & 0x1F;
+        int8_t val = (*index) & 0x1F;
         *off += 1;
         if(ctx->node->isKey == 0){
-            ctx->node->int_val= -val;
+            ctx->node->value.int8_val = val;
         }
         else{
             sprintf(tmp_str, "%d", -val);
             str_len = strlen(tmp_str);
             str_int = (string_t) malloc(sizeof(char)*str_len);
             memcpy(str_int, tmp_str, str_len);
-            ctx->node->name = str_int;
+            ctx->node->key = str_int;
         }
        return;
     }
 
-    switch(head){
+    switch(head)
+    {
         case 0xCC:
-            uval_8 = (unsigned int) *(index + 1);
+        {
+            uint8_t uval_8 = (uint8_t) *(index + 1);
             printf("val: %u\n", uval_8);
             *off += 2;
             if(ctx->node->isKey == 0){
-                ctx->node->int_val = uval_8;
+                ctx->node->value.uint8_val = uval_8;
             }
             else{
                 sprintf(tmp_str, "%u", uval_8);
                 str_len = strlen(tmp_str);
                 str_int = (string_t) malloc(sizeof(char)*(str_len));
                 memcpy(str_int, tmp_str, str_len);
-                ctx->node->name = str_int;
+                ctx->node->key = str_int;
             }
-            return;
+            break;
+        }
             
         case 0xCD:
-            uval_16 = (unsigned int)(*(index + 1) << 8) + *(index + 2);
+        {
+            uint16_t uval_16 = (uint16_t)(*(index + 1) << 8) + *(index + 2);
             printf("val: %u\n", uval_16);
             *off += 3;
             if(ctx->node->isKey == 0){
-                ctx->node->int_val = uval_16;
+                ctx->node->value.uint16_val = uval_16;
             }
             else{
                 sprintf(tmp_str, "%u", uval_16);
                 str_len = strlen(tmp_str);
                 str_int = (string_t) malloc(sizeof(char)*str_len);
                 memcpy(str_int, tmp_str, str_len);
-                ctx->node->name = str_int;
+                ctx->node->key = str_int;
             }
-            return;
-            
+            break;
+        }
         case 0xCE:
-            uval_32 = (unsigned int)((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
+        {
+            uint32_t uval_32 = (uint32_t)((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
             printf("val: %u\n", uval_32);
             *off += 5;
             if(ctx->node->isKey == 0){
-                ctx->node->int_val = uval_32;
+                ctx->node->value.uint32_val= uval_32;
             }
             else{
                 sprintf(tmp_str, "%u", uval_32);
                 str_len = strlen(tmp_str);
                 str_int = (string_t) malloc(sizeof(char)*str_len);
                 memcpy(str_int, tmp_str, str_len);
-                ctx->node->name = str_int;
+                ctx->node->key = str_int;
             }
-            return;
-
+            break;
+        }
         case 0xCF:
-            tmp = *(index + 1);
+        {
+            uint64_t uval_64 = 0; 
             for(i = 0; i < 8; i++){
-                tmp = *(index + 8 - i );
+                uint64_t tmp = *(index + 8 - i );
                 uval_64 += tmp << (i * 8);
             }
-            printf("val: %llu\n", uval_64);
+            printf("val: %lu\n", uval_64);
             *off += 9;
             if(ctx->node->isKey == 0){
-                ctx->node->int_val = uval_64;
+                ctx->node->value.uint64_val= uval_64;
             }
             else{
-                sprintf(tmp_str, "%llu", uval_64);
+                sprintf(tmp_str, "%lu", uval_64);
                 str_len = strlen(tmp_str);
                 str_int = (string_t) malloc(sizeof(char)*(str_len));
                 memcpy(str_int, tmp_str, str_len);
-                ctx->node->name = str_int;
+                ctx->node->key = str_int;
             }
-            return;
-
+        }
         case 0xD0:
-            val_8 = (int) *(index + 1);
+        {
+            int8_t val_8 = (int) *(index + 1);
             printf("val: %d\n", val_8);
             *off += 2;
             if(ctx->node->isKey == 0){
-                ctx->node->int_val = val_8;
+                ctx->node->value.int8_val = val_8;
             }
             else{
                 sprintf(tmp_str, "%d", val_8);
                 str_len = strlen(tmp_str);
                 str_int = (string_t) malloc(sizeof(char)*str_len);
                 memcpy(str_int, tmp_str, str_len);
-                ctx->node->name = str_int;
+                ctx->node->key = str_int;
             }
-            return;
+            break;
+        }
 
         case 0xD1:
-            val_16 = (int) ((*(index + 1) << 8) + *(index + 2));
+        {
+            int16_t val_16 = (int) ((*(index + 1) << 8) + *(index + 2));
             printf("val: %d\n", val_16);
             *off += 3;
             if(ctx->node->isKey == 0){
-                ctx->node->int_val = val_16;
+                ctx->node->value.int16_val = val_16;
             }
             else{
                 sprintf(tmp_str, "%d", val_16);
                 str_len = strlen(tmp_str);
                 str_int = (string_t) malloc(sizeof(char)*str_len);
                 memcpy(str_int, tmp_str, str_len);
-                ctx->node->name = str_int;
+                ctx->node->key = str_int;
             }
-            return;
+            break;
+        }
 
         case 0xD2:
-            val_32 = (int) ((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
+        {
+            int32_t val_32 = (int) ((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
             printf("val: %d\n", val_32);
             *off += 5;
             if(ctx->node->isKey == 0){
-                ctx->node->int_val = val_32;
+                ctx->node->value.int32_val = val_32;
             }
             else{
                 sprintf(tmp_str, "%d", val_32);
                 str_len = strlen(tmp_str);
                 str_int = (string_t) malloc(sizeof(char)*str_len);
                 memcpy(str_int, tmp_str, str_len);
-                ctx->node->name = str_int;
+                ctx->node->key = str_int;
             }
-            return;
+            break;
+        }
 
         case 0xD3:
-            tmp = *(index + 1);
+        {
+            int64_t val_64 = *(index + 1);
             for(i = 0; i < 8; i++){
-                tmp = *(index + 8 - i );
+                int64_t tmp = *(index + 8 - i );
                 val_64 += tmp << (i * 8);
             }
-            printf("val: %lld\n", val_64);
+            printf("val: %ld\n", val_64);
             *off += 9;
             if(ctx->node->isKey == 0){
-                ctx->node->int_val = val_64;
+                ctx->node->value.int64_val = val_64;
             }
             else{
-                sprintf(tmp_str, "%lld", val_64);
+                sprintf(tmp_str, "%ld", val_64);
                 str_len = strlen(tmp_str);
                 str_int = (string_t) malloc(sizeof(char)*str_len);
                 memcpy(str_int, tmp_str, str_len);
-                ctx->node->name = str_int;
+                ctx->node->key = str_int;
             }
-            return;
+        }
     }
 }/*}}}*/
 
@@ -497,7 +477,7 @@ void ParseFloat(Context *ctx){/*{{{*/
             float_union.float_buf[i] = *(index + 4 - i);  
         }
         *off += 5;
-        ctx->node->float_val = float_union.float_tmp;
+        ctx->node->value.float_val = float_union.float_tmp;
         return;
     }
     if(head == 0xCB){
@@ -506,7 +486,7 @@ void ParseFloat(Context *ctx){/*{{{*/
             float_union.double_buf[i] = *(index + 8 - i);
         }
         *off += 9;
-        ctx->node->float_val = float_union.double_tmp;
+        ctx->node->value.float_val = float_union.double_tmp;
         return;
     }
 }/*}}}*/
