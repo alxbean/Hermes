@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 typedef unsigned char uint8_t;
 
@@ -26,11 +27,19 @@ typedef struct {
     msgpack_object_union via;
 } msgpack_object;
 
+char * k(char * b){
+    printf("%s\n",b);
+    char a[] = {'1', '2', '3'};
+    printf("%s\n",a);
+    return b;
+}
+
 
 int main(){
     uint8_t test[] = {0xAA, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x77, 0x6F, 0x72, 0x6C, 0x64};
 
-    msgpack_object *obj = (msgpack_object *) test;
+    char a[] = {'1', '2', '3'};
 
-    printf("%s\n", obj->via.str.ptr);
+    unsigned char t[] = {0x07, 0x5B, 0xCD, 0x15}; 
+    printf("%d ", (int32_t)t);
 }

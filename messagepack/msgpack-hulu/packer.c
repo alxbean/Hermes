@@ -6,11 +6,85 @@
  ************************************************************************/
 
 #include <stdio.h>
-#include <msgpack.h>
-//#include "include/unpacker.h"
 #include "unpacker.c"
+#include "./include/packer.h"
 
-void PackMessage(msgpack_packer *pk, Object *obj){/*{{{*/
+#define INIT_BUFFER_SIZE 8192
+
+//ENDIAN_LITTLE
+#define TAKE8_8(d)  ((uint8_t *)&d)[0]
+#define TAKE8_16(d) ((uint8_t *)&d)[0]
+#define TAKE8_32(d) ((uint8_t *)&d)[0]
+#define TAKE8_64(d) ((uint8_t *)&d)[0]
+
+//ENDIAN_BIG
+
+PackBuffer* NewPackBuffer(){
+    PackBuffer * pb = (PackBuffer *) calloc(1, sizeof(PackBuffer)); 
+    if( NULL == pb){
+        perror("NewPackBuffer:");
+        return NULL;
+    }
+
+    return pb;
+}
+
+int PackAppendBuffer(PackBuffer *pb, const char *buf, size_t len){
+    if(pb->alloc - pb->off < len){
+        void tmp;
+        size_t nsize = (pb->alloc) ? pb->alloc*2 : INIT_BUFFER_SIZE;
+        while(nsize < pb->off + len){
+            size_t tmp_nsize = nsize * 2;
+            if (tmp_nize <= nsize){
+                nsize = pb->off + len;
+                break;
+            }
+            nsize = tmp_nsize;
+        }
+    
+        tmp = realloc(pb->buffer, nsize);
+        if(!tmp)
+         return -1;
+
+        pb->buffer = (ubyte_t)tmp;
+        pb->alloc = nsize;
+    }
+
+    memcpy(pb->buffer + pb->size, buf, len);
+    pb->size += len;
+    return 0;
+}
+
+void PackString(PackBuffer *pb, size_t len){
+   if(len < 32){
+       ubyte_t head = 0xa0 | (uint8_t)len; 
+       PackAppendBuffer(pb, &TAKE8_8(head), 1); 
+   } else if(len < 256){
+       ubyte_t buf[2];
+       buf[0] = 0xd9;
+       buf[1] = ((uint8_t *)&len)[0];
+       PackAppendBuffer(pb, buf, 2);
+   } else if(len < 65536){
+       ubyte_t buf[3];
+       buf[0] = 0xda;
+       buf[1] = ((uint8_t*)&len)[0];
+       buf[2] = ((uint8_t*)&len)[1];
+       PackAppendBuffer(pb, buf, 3); 
+   } else{
+       ubyte_t buf[5];
+       buf[0] = 0xdb;
+       buf[1] = ((uint8_t*)&len)[0];
+       buf[2] = ((uint8_t*)&len)[1];
+       buf[3] = ((uint8_t*)&len)[2];
+       buf[4] = ((uint8_t*)&len)[3];
+   }
+}
+
+void PackStringBody(PackBuffer *pb, const void* body, size_t len){
+    PackAppendBuffer(pb, (const unsigned char*)body, len);
+}
+
+void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
     if(obj->isKey == TRUE){
         switch(obj->key_type){
             case OBJ_TYPE_STR:
@@ -148,12 +222,13 @@ void PackMessage(msgpack_packer *pk, Object *obj){/*{{{*/
         
 }/*}}}*/
 
-msgpack_sbuffer * MessagePacker(Object *obj){
+
+PackBuffer *MessagePacker(Object *obj){
         /* creates buffer and serializer instance. */
-        msgpack_sbuffer* buffer = msgpack_sbuffer_new();
-        msgpack_packer* pk = msgpack_packer_new(buffer, msgpack_sbuffer_write);
-        PackMessage(pk, obj);
-        return buffer;
+        PackBuffer *pb = NewPackBuffer(); 
+        PackMessage(pb, obj);
+
+        return pb;
 }
 
 void print(char const *buf, unsigned int len){
