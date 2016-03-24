@@ -23,6 +23,8 @@ int main(void) {
         msgpack_packer* pk = msgpack_packer_new(buffer, msgpack_sbuffer_write);
 
         /* serializes ["Hello", "MessagePack"]. */
+        signed long x = 11111111111111111;
+        msgpack_pack_long(pk, x);
         msgpack_pack_array(pk, 2);
         msgpack_pack_bin(pk, 5);
         msgpack_pack_bin_body(pk, "Hello", 5);

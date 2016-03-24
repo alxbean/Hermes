@@ -41,5 +41,8 @@ int main(){
     unsigned char t[] = {0x07, 0x01, 0x00, 0x15}; 
     uint16_t k = (uint16_t ) ((t[0] << 8) + t[1]); 
     printf("%u\n", k);
-    printf("%u\n", ((uint16_t *)t)[0]);
+    printf("%u\n", ((uint16_t *)t)[1]);
+
+    int i = 1;
+    printf("%2x %2x\n", ((uint8_t *)&i)[0], ((uint8_t *)&i)[1]);
 }
