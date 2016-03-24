@@ -31,58 +31,320 @@ PackBuffer* NewPackBuffer(){
 
 int PackAppendBuffer(PackBuffer *pb, const char *buf, size_t len){
     if(pb->alloc - pb->off < len){
-        void tmp;
         size_t nsize = (pb->alloc) ? pb->alloc*2 : INIT_BUFFER_SIZE;
         while(nsize < pb->off + len){
             size_t tmp_nsize = nsize * 2;
-            if (tmp_nize <= nsize){
+            if (tmp_nsize <= nsize){
                 nsize = pb->off + len;
                 break;
             }
             nsize = tmp_nsize;
         }
     
-        tmp = realloc(pb->buffer, nsize);
+        ubyte_t *tmp = (ubyte_t *)realloc(pb->buffer, nsize);
         if(!tmp)
          return -1;
 
-        pb->buffer = (ubyte_t)tmp;
+        pb->buffer = (ubyte_t*)tmp;
         pb->alloc = nsize;
     }
 
-    memcpy(pb->buffer + pb->size, buf, len);
-    pb->size += len;
+    memcpy(pb->buffer + pb->off, buf, len);
+    pb->off += len;
     return 0;
 }
 
 void PackString(PackBuffer *pb, size_t len){
    if(len < 32){
-       ubyte_t head = 0xa0 | (uint8_t)len; 
+       ubyte_t head = 0xa0 | (ubyte_t)len; 
        PackAppendBuffer(pb, &TAKE8_8(head), 1); 
    } else if(len < 256){
        ubyte_t buf[2];
        buf[0] = 0xd9;
-       buf[1] = ((uint8_t *)&len)[0];
+       buf[1] = ((ubyte_t *)&len)[0];
        PackAppendBuffer(pb, buf, 2);
    } else if(len < 65536){
        ubyte_t buf[3];
        buf[0] = 0xda;
-       buf[1] = ((uint8_t*)&len)[0];
-       buf[2] = ((uint8_t*)&len)[1];
+       buf[1] = ((ubyte_t *)&len)[0];
+       buf[2] = ((ubyte_t *)&len)[1];
        PackAppendBuffer(pb, buf, 3); 
    } else{
        ubyte_t buf[5];
        buf[0] = 0xdb;
-       buf[1] = ((uint8_t*)&len)[0];
-       buf[2] = ((uint8_t*)&len)[1];
-       buf[3] = ((uint8_t*)&len)[2];
-       buf[4] = ((uint8_t*)&len)[3];
+       buf[1] = ((ubyte_t *)&len)[0];
+       buf[2] = ((ubyte_t *)&len)[1];
+       buf[3] = ((ubyte_t *)&len)[2];
+       buf[4] = ((ubyte_t *)&len)[3];
    }
 }
 
 void PackStringBody(PackBuffer *pb, const void* body, size_t len){
-    PackAppendBuffer(pb, (const unsigned char*)body, len);
+    PackAppendBuffer(pb, (const ubyte_t*)body, len);
 }
+
+void PackFixNumPositive(PackBuffer *pb, uint8_t d){
+    PackAppendBuffer(pb, &TAKE8_8(d), 1);
+}
+
+void PackFixNumNegative(PackBuffer *pb, int8_t d){
+    PackAppendBuffer(pb, &TAKE8_8(d), 1);
+}
+
+void PackFixInt8_u(PackBuffer *pb, uint8_t d){
+    ubyte_t buf[2] = {0xcc, TAKE8_8(d)};
+    PackAppendBuffer(pb, buf, 2);
+}
+
+void PackFixInt16_u(PackBuffer *pb, uint16_t d){
+    ubyte_t buf[3];
+    buf[0] = 0xcd;
+    buf[1] = ((ubyte_t *)&d)[0];
+    buf[2] = ((ubyte_t *)&d)[1];
+    PackAppendBuffer(pb, buf, 3);
+}
+
+void PackFixInt32_u(PackBuffer *pb, uint32_t d){
+    ubyte_t buf[5];
+    buf[0] = 0xce;
+    buf[1] = ((ubyte_t *)&d)[0];
+    buf[2] = ((ubyte_t *)&d)[1];
+    buf[3] = ((ubyte_t *)&d)[2];
+    buf[4] = ((ubyte_t *)&d)[3];
+    PackAppendBuffer(pb, buf, 5);
+}
+
+void PackFixInt64_u(PackBuffer *pb, uint64_t d){
+    ubyte_t buf[9];
+    buf[0] = 0xce;
+    buf[1] = ((ubyte_t *)&d)[0];
+    buf[2] = ((ubyte_t *)&d)[1];
+    buf[3] = ((ubyte_t *)&d)[2];
+    buf[4] = ((ubyte_t *)&d)[3];
+    buf[5] = ((ubyte_t *)&d)[4];
+    buf[6] = ((ubyte_t *)&d)[5];
+    buf[7] = ((ubyte_t *)&d)[6];
+    buf[8] = ((ubyte_t *)&d)[7];
+    PackAppendBuffer(pb, buf, 9);
+}
+
+void PackFixInt8(PackBuffer *pb, int8_t d){
+    ubyte_t buf[2] = {0xd0, TAKE8_8(d)};
+    PackAppendBuffer(pb, buf, 2);
+}
+
+void PackFixInt16(PackBuffer *pb, int16_t d){
+    ubyte_t buf[3];
+    buf[0] = 0xd1;
+    buf[1] = ((ubyte_t *)&d)[0];
+    buf[2] = ((ubyte_t *)&d)[1];
+    PackAppendBuffer(pb, buf, 3);
+}
+
+void PackFixInt32(PackBuffer *pb, int32_t d){
+    ubyte_t buf[5];
+    buf[0] = 0xd2;
+    buf[1] = ((ubyte_t *)&d)[0];
+    buf[2] = ((ubyte_t *)&d)[1];
+    buf[3] = ((ubyte_t *)&d)[2];
+    buf[4] = ((ubyte_t *)&d)[3];
+    PackAppendBuffer(pb, buf, 5);
+}
+
+void PackFixInt64(PackBuffer *pb, int64_t d){
+    ubyte_t buf[9];
+    buf[0] = 0xd3;
+    buf[1] = ((ubyte_t *)&d)[0];
+    buf[2] = ((ubyte_t *)&d)[1];
+    buf[3] = ((ubyte_t *)&d)[2];
+    buf[4] = ((ubyte_t *)&d)[3];
+    buf[5] = ((ubyte_t *)&d)[4];
+    buf[6] = ((ubyte_t *)&d)[5];
+    buf[7] = ((ubyte_t *)&d)[6];
+    buf[8] = ((ubyte_t *)&d)[7];
+    PackAppendBuffer(pb, buf, 9);
+}
+
+void PackNil(PackBuffer *pb){
+    static const ubyte_t d = 0xc0;
+    PackAppendBuffer(pb, &d, 1);
+}
+
+void PackTrue(PackBuffer *pb){
+    static const ubyte_t d = 0xc3;
+    PackAppendBuffer(pb, &d, 1);
+}
+
+void PackFalse(PackBuffer *pb){
+    static const ubyte_t d = 0xc2;
+    PackAppendBuffer(pb, &d, 1);
+}
+
+void PackFloat(PackBuffer *pb, float d){
+    ubyte_t buf[5];
+    union {
+        float f; uint32_t i;
+    } mem;
+    mem.f = d;
+    buf[0] = 0xca;
+    buf[1] = ((ubyte_t *)&mem.i)[0];
+    buf[2] = ((ubyte_t *)&mem.i)[1];
+    buf[3] = ((ubyte_t *)&mem.i)[2];
+    buf[4] = ((ubyte_t *)&mem.i)[3];
+    PackAppendBuffer(pb, buf, 5);
+}
+
+void PackDouble(PackBuffer *pb, double d){
+    ubyte_t buf[9];
+    union{
+        double f; uint64_t i;
+    } mem;
+    mem.f = d;
+    buf[0] = 0xcb;
+    buf[1] = ((ubyte_t *)&mem.i)[0];
+    buf[2] = ((ubyte_t *)&mem.i)[1];
+    buf[3] = ((ubyte_t *)&mem.i)[2];
+    buf[4] = ((ubyte_t *)&mem.i)[3];
+    buf[5] = ((ubyte_t *)&mem.i)[4];
+    buf[6] = ((ubyte_t *)&mem.i)[5];
+    buf[7] = ((ubyte_t *)&mem.i)[6];
+    buf[8] = ((ubyte_t *)&mem.i)[7];
+    PackAppendBuffer(pb, buf, 9);
+}
+
+void PackArray(PackBuffer *pb, size_t n){
+    if(n < 16){
+        ubyte_t d = 0x90 | (ubyte_t)n;
+        PackAppendBuffer(pb, &TAKE8_8(d), 1);
+    } else if(n < 65536){
+        ubyte_t buf[3];
+        buf[0] = 0xdc;
+        buf[1] = ((ubyte_t *)&n)[0];
+        buf[2] = ((ubyte_t *)&n)[1];
+        PackAppendBuffer(pb, buf, 3);
+    } else{
+        ubyte_t buf[5];
+        buf[0] = 0xdd;
+        buf[1] = ((ubyte_t *)&n)[0];
+        buf[2] = ((ubyte_t *)&n)[1];
+        buf[3] = ((ubyte_t *)&n)[2];
+        buf[4] = ((ubyte_t *)&n)[3];
+        PackAppendBuffer(pb, buf, 5);
+    }
+}
+
+void PackMap(PackBuffer *pb, size_t n){
+    if(n < 16){
+        ubyte_t d = 0x80 | (ubyte_t)n;
+        PackAppendBuffer(pb, &TAKE8_8(d), 1);
+    } else if(n < 65536){
+        ubyte_t buf[3];
+        buf[0] = 0xde;
+        buf[1] = ((ubyte_t *)&n)[0];
+        buf[2] = ((ubyte_t *)&n)[1];
+        PackAppendBuffer(pb, buf, 3);
+    } else{
+        ubyte_t buf[5];
+        buf[0] = 0xdf;
+        buf[1] = ((ubyte_t *)&n)[0];
+        buf[2] = ((ubyte_t *)&n)[1];
+        buf[3] = ((ubyte_t *)&n)[2];
+        buf[4] = ((ubyte_t *)&n)[3];
+        PackAppendBuffer(pb, buf, 5);
+    }
+}
+
+void PackBin(PackBuffer *pb, size_t len){
+    if(len < 256){
+        ubyte_t buf[2];
+        buf[0] = 0xc4;
+        buf[1] = (uint8_t)len;
+        PackAppendBuffer(pb, buf, 3);
+    } else if(len < 65536){
+        ubyte_t buf[3];
+        buf[0] = 0xc5;
+        buf[1] = ((ubyte_t *)&len)[0];
+        buf[2] = ((ubyte_t *)&len)[1];
+        PackAppendBuffer(pb, buf, 3);
+    } else{
+        ubyte_t buf[5];
+        buf[0] = 0xc6;
+        buf[1] = ((ubyte_t *)&len)[0];
+        buf[2] = ((ubyte_t *)&len)[1];
+        buf[3] = ((ubyte_t *)&len)[2];
+        buf[4] = ((ubyte_t *)&len)[3];
+        PackAppendBuffer(pb, buf, 5);
+    }
+}
+
+void PackBinBody(PackBuffer *pb, const void *body, size_t len){
+    PackAppendBuffer(pb, (const ubyte_t *) body, len);
+}
+
+void PackExt(PackBuffer *pb, size_t len, int8_t type){
+    switch(len){
+        case 1:{
+            ubyte_t buf[2];
+            buf[0] = 0xd4;
+            buf[1] = type;
+            PackAppendBuffer(pb, buf, 2);
+        } break;
+        case 2:{
+            ubyte_t buf[2];
+            buf[0] = 0xd5;
+            buf[1] = type;
+            PackAppendBuffer(pb, buf, 2);
+        } break;
+        case 4:{
+            ubyte_t buf[2];
+            buf[0] = 0xd6;
+            buf[1] = type;
+            PackAppendBuffer(pb, buf, 2);
+        } break;
+        case 8:{
+            ubyte_t buf[2];
+            buf[0] = 0xd7;
+            buf[1] = type;
+            PackAppendBuffer(pb, buf, 2);
+        } break;
+        case 16:{
+            ubyte_t buf[2];
+            buf[0] = 0xd8;
+            buf[1] = type;
+            PackAppendBuffer(pb, buf, 2);
+        } break;
+        default:
+            if(len <256){
+                ubyte_t buf[2];
+                buf[0] = 0xc7;
+                buf[1] = (ubyte_t)len;
+                buf[2] = type;
+                PackAppendBuffer(pb, buf, 3);
+            } else if(len < 65536){
+                ubyte_t buf[4];
+                buf[0] = 0xc8;
+                buf[1] = ((ubyte_t *)&len)[0];
+                buf[2] = ((ubyte_t *)&len)[1];
+                buf[3] = type;
+                PackAppendBuffer(pb, buf, 4);
+            } else{
+                ubyte_t buf[6];
+                buf[0] = 0xc9;
+                buf[1] = ((ubyte_t *)&len)[0];
+                buf[2] = ((ubyte_t *)&len)[1];
+                buf[3] = ((ubyte_t *)&len)[2];
+                buf[4] = ((ubyte_t *)&len)[3];
+                buf[5] = type;
+                PackAppendBuffer(pb, buf, 6);
+            }
+            break;
+    }
+}
+
+void PackExtBody(PackBuffer *pb, const void *body, size_t len){
+    PackAppendBuffer(pb, (const ubyte_t *)body, len);
+}
+
 
 void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
     if(obj->isKey == TRUE){
@@ -221,7 +483,6 @@ void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
     }
         
 }/*}}}*/
-
 
 PackBuffer *MessagePacker(Object *obj){
         /* creates buffer and serializer instance. */

@@ -30,7 +30,9 @@ extern "C" {
         OBJ_TYPE_NIL = 0x0E,
         OBJ_TYPE_ARRAY = 0x0F,
         OBJ_TYPE_MAP = 0x10,
-        OBJ_TYPE_EXT = 0x11
+        OBJ_TYPE_EXT = 0x11,
+        OBJ_TYPE_POSITIVE_INT = 0x12,
+        OBJ_TYPE_NEGATIVE_INT = 0x13
     }Object_Type; 
     
     typedef union Object_Value{

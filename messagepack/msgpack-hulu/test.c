@@ -38,8 +38,8 @@ char * k(char * b){
 int main(){
     uint8_t test[] = {0xAA, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x77, 0x6F, 0x72, 0x6C, 0x64};
 
-    char a[] = {'1', '2', '3'};
-
-    unsigned char t[] = {0x07, 0x5B, 0xCD, 0x15}; 
-    printf("%d ", (int32_t)t);
+    unsigned char t[] = {0x07, 0x01, 0x00, 0x15}; 
+    uint16_t k = (uint16_t ) ((t[0] << 8) + t[1]); 
+    printf("%u\n", k);
+    printf("%u\n", ((uint16_t *)t)[0]);
 }

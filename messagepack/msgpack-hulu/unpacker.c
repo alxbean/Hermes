@@ -293,7 +293,7 @@ void ParseInteger(Context *ctx){/*{{{*/
     int i = 0;
     
     if( (head & 0x80) == 0){
-        uint8_t val = (*index) & 0x7F; 
+        uint8_t val = (uint8_t)(*index);
         *off += 1;
         if(ctx->node->isKey == FALSE){
             ctx->node->value.uint8_val = val;
@@ -305,7 +305,7 @@ void ParseInteger(Context *ctx){/*{{{*/
     }
 
     if( (head & 0xE0) == 0xE0){
-        int8_t val = (*index) & 0x1F;
+        int8_t val = (*index);
         *off += 1;
         if(ctx->node->isKey == FALSE){
             ctx->node->value.int8_val = val;
@@ -334,7 +334,7 @@ void ParseInteger(Context *ctx){/*{{{*/
             
         case 0xCD:
         {
-            uint16_t uval_16 = (uint16_t)(*(index + 1) << 8) + *(index + 2);
+            uint16_t uval_16 = (uint16_t)((*(index + 1) << 8) + *(index + 2));
             printf("val: %u\n", uval_16);
             *off += 3;
             if(ctx->node->isKey == FALSE){
@@ -376,7 +376,7 @@ void ParseInteger(Context *ctx){/*{{{*/
         }
         case 0xD0:
         {
-            int8_t val_8 = (int) *(index + 1);
+            int8_t val_8 = (int8_t) *(index + 1);
             printf("val: %d\n", val_8);
             *off += 2;
             if(ctx->node->isKey == FALSE){
@@ -390,7 +390,7 @@ void ParseInteger(Context *ctx){/*{{{*/
 
         case 0xD1:
         {
-            int16_t val_16 = (int) ((*(index + 1) << 8) + *(index + 2));
+            int16_t val_16 = (int16_t) ((*(index + 1) << 8) + *(index + 2));
             printf("val: %d\n", val_16);
             *off += 3;
             if(ctx->node->isKey == FALSE){
@@ -404,7 +404,7 @@ void ParseInteger(Context *ctx){/*{{{*/
 
         case 0xD2:
         {
-            int32_t val_32 = (int) ((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
+            int32_t val_32 = (int32_t) ((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
             printf("val: %d\n", val_32);
             *off += 5;
             if(ctx->node->isKey == FALSE){
@@ -471,9 +471,9 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
     ubyte_t head = *index;
     if ( (head & 0x80) == 0){
         if(ctx->node->isKey == TRUE) 
-            ctx->node->key_type = OBJ_TYPE_UINT8;
+            ctx->node->key_type = OBJ_TYPE_POSITIVE_INT;
         else
-            ctx->node->obj_type = OBJ_TYPE_UINT8;
+            ctx->node->obj_type = OBJ_TYPE_POSITIVE_INT;
             
         ParseInteger(ctx);
         printf("positive fixint\n");
@@ -481,9 +481,9 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
     }
     if( (head & 0xE0) == 0xE0){
         if(ctx->node->isKey == TRUE) 
-            ctx->node->key_type = OBJ_TYPE_INT8;
+            ctx->node->key_type = OBJ_TYPE_NEGATIVE_INT;
         else
-            ctx->node->obj_type = OBJ_TYPE_INT8;
+            ctx->node->obj_type = OBJ_TYPE_NEGATIVE_INT;
         ParseInteger(ctx);
         printf("negative fixint\n");
         return;
