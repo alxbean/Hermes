@@ -14,6 +14,7 @@ Object * NewObject(){
         perror("NewObject:");
         return NULL;
     }
+    new_node->isKey = FALSE;
     return new_node;
 }
 
@@ -45,7 +46,7 @@ void ParseEXT(Context *ctx){/*{{{*/
             ctx->node = new_node;
         }
     }else if(head == 0xC8){
-        len = (*(index + 1) << 8) + *(index + 2); 
+        len = (*(index + 1) << 8) | *(index + 2); 
         *off += 4;
         int start = *off;
         Object *parent = ctx->node;
@@ -65,7 +66,7 @@ void ParseEXT(Context *ctx){/*{{{*/
             ctx->node = new_node;
         }
     }else if(head == 0xC9){
-        len = (*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4); 
+        len = (*(index + 1) << 24) | (*(index + 2) << 16) | (*(index + 3) << 8) | *(index + 4); 
         *off += 6;
         int start = *off;
         Object *parent = ctx->node;
@@ -175,7 +176,7 @@ void ParseBin(Context *ctx){/*{{{*/
             *off += (len + 1);
             break;
         case 0xC5:
-            len = (*(index+1)<<8) + *(index+2);
+            len = (*(index+1)<<8) | *(index+2);
             printf("len: %d\n", len);
             bin = (ubyte_t *) malloc(sizeof(ubyte_t)*len);
             memcpy(bin, (index+3), len);
@@ -183,7 +184,7 @@ void ParseBin(Context *ctx){/*{{{*/
             *off += (len + 1);
             break;
         case 0xC6:
-            len = (*(index + 1)<<24) + (*(index + 2)<<16) + (*(index + 3)<<8) + *(index + 4);
+            len = (*(index + 1)<<24) | (*(index + 2)<<16) | (*(index + 3)<<8) | *(index + 4);
             printf("len: %d\n", len);
             bin = (ubyte_t*) malloc(sizeof(ubyte_t)*len);
             memcpy(bin, (index+5), len);
@@ -233,7 +234,7 @@ void ParseString(Context *ctx){/*{{{*/
             }
             return;
         case 0xDA:
-            len = (*(index + 1)<<8) + *(index+2);
+            len = (*(index + 1)<<8) | *(index+2);
             ctx->node->obj_len = len;
             printf("len: %d\n", len);
             str = (char *) malloc(sizeof(char)*len);
@@ -248,7 +249,7 @@ void ParseString(Context *ctx){/*{{{*/
             }
             return;
         case 0xDB:
-            len = (*(index + 1)<<24) + (*(index + 2)<<16) + (*(index + 3)<<8) + *(index + 4);
+            len = (*(index + 1)<<24) | (*(index + 2)<<16) | (*(index + 3)<<8) | *(index + 4);
             ctx->node->obj_len = len;
             printf("len: %d\n", len);
             str = (char *) malloc(sizeof(char)*len);
@@ -334,7 +335,7 @@ void ParseInteger(Context *ctx){/*{{{*/
             
         case 0xCD:
         {
-            uint16_t uval_16 = (uint16_t)((*(index + 1) << 8) + *(index + 2));
+            uint16_t uval_16 = (uint16_t)((*(index + 1) << 8) | *(index + 2));
             printf("val: %u\n", uval_16);
             *off += 3;
             if(ctx->node->isKey == FALSE){
@@ -347,7 +348,7 @@ void ParseInteger(Context *ctx){/*{{{*/
         }
         case 0xCE:
         {
-            uint32_t uval_32 = (uint32_t)((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
+            uint32_t uval_32 = (uint32_t)((*(index + 1) << 24) | (*(index + 2) << 16) | (*(index + 3) << 8) | *(index + 4));
             printf("val: %u\n", uval_32);
             *off += 5;
             if(ctx->node->isKey == FALSE){
@@ -363,7 +364,7 @@ void ParseInteger(Context *ctx){/*{{{*/
             uint64_t uval_64 = 0; 
             for(i = 0; i < 8; i++){
                 uint64_t tmp = *(index + 8 - i );
-                uval_64 += tmp << (i * 8);
+                uval_64 |= tmp << (i * 8);
             }
             printf("val: %lu\n", uval_64);
             *off += 9;
@@ -390,7 +391,7 @@ void ParseInteger(Context *ctx){/*{{{*/
 
         case 0xD1:
         {
-            int16_t val_16 = (int16_t) ((*(index + 1) << 8) + *(index + 2));
+            int16_t val_16 = (int16_t) ((*(index + 1) << 8) | *(index + 2));
             printf("val: %d\n", val_16);
             *off += 3;
             if(ctx->node->isKey == FALSE){
@@ -404,7 +405,7 @@ void ParseInteger(Context *ctx){/*{{{*/
 
         case 0xD2:
         {
-            int32_t val_32 = (int32_t) ((*(index + 1) << 24) + (*(index + 2) << 16) + (*(index + 3) << 8) + *(index + 4));
+            int32_t val_32 = (int32_t) ((*(index + 1) << 24) | (*(index + 2) << 16) | (*(index + 3) << 8) | *(index + 4));
             printf("val: %d\n", val_32);
             *off += 5;
             if(ctx->node->isKey == FALSE){
@@ -421,7 +422,7 @@ void ParseInteger(Context *ctx){/*{{{*/
             int64_t val_64 = *(index + 1);
             for(i = 0; i < 8; i++){
                 int64_t tmp = *(index + 8 - i );
-                val_64 += tmp << (i * 8);
+                val_64 |= tmp << (i * 8);
             }
             printf("val: %ld\n", val_64);
             *off += 9;
@@ -677,12 +678,21 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
     }
 }/*}}}*/
 
-Object * MSGPackParser(ubyte_t *buf){
+Object * MessageUnpacker(ubyte_t *buf, int len){
     Context *ctx = (Context *)calloc(1, sizeof(Context));
-    ctx->root = NewObject(); 
-    ctx->node = ctx->root;
     ctx->buf = buf;
-    ParseDispatcher(ctx);
+    while(ctx->off < len){
+        int tmp_off = ctx->off;
+        Object *new_node = NewObject();
+        if(ctx->off == 0)
+            ctx->root = new_node;
+        else
+            ctx->node->next = new_node;
+        ctx->node = new_node;
+        ParseDispatcher(ctx);
+        if(ctx->off == tmp_off)
+            break;
+    }
 
     return ctx->root;
 }

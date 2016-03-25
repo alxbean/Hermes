@@ -5,6 +5,7 @@
     > Created Time: Mon 07 Mar 2016 08:05:25 AM UTC
  ************************************************************************/
 #include <stdint.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,7 +17,14 @@ extern "C" {
         TRUE = 1,
         FALSE = 0
     }bool_t;
+
+    static union{
+        char a[4];
+        unsigned long ul;
+    }endian={{'L','?', '?', 'B'}};
+
+    #define ENDIAN ((char)endian.ul)
+
 #ifdef __cplusplus
 }
 #endif
-

@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "unpacker.h"
+//#include "unpacker.h"
+#include "../unpacker.c"
 
 #ifdef __cplusplus
 extern "C" {
