@@ -24,70 +24,212 @@ void ParseEXT(Context *ctx){/*{{{*/
     ubyte_t head = *index & 0xFF;
     int len = 0;
 
-    if(head == 0xC7){
-        len = *(index + 1); 
-        *off += 3;
-        int start = *off;
-        Object *parent = ctx->node;
-        parent->obj_len = len;
+    switch(head){
+        case 0xD4:
+        {
+            len = 1; 
+            *off += 2;
+            int start = *off;
+            Object *parent = ctx->node;
+            parent->obj_len = len;
 
-        while((*off - start) < len){
-            Object *new_node = NewObject();
-            if(*off == start)
-                parent->child = new_node;
-            else
-                ctx->node->next = new_node;
-            ctx->node = new_node;
-            ctx->node->isKey = TRUE; 
-            ParseDispatcher(ctx);//key
-            ctx->node->isKey = FALSE; 
-            ParseDispatcher(ctx);//value
-            ctx->node->isKey = TRUE;//set flag key-value
-            ctx->node = new_node;
+            while((*off - start) < len){
+               Object *new_node = NewObject();
+               if(*off == start)
+                   parent->child = new_node;
+               else
+                   ctx->node->next = new_node;
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE; 
+               ParseDispatcher(ctx);//key
+               ctx->node->isKey = FALSE; 
+               ParseDispatcher(ctx);//value
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE;//set flag key-value
+            }
+            
+            break;
         }
-    }else if(head == 0xC8){
-        len = (*(index + 1) << 8) | *(index + 2); 
-        *off += 4;
-        int start = *off;
-        Object *parent = ctx->node;
+        case 0xD5:
+        {
+            len = 2; 
+            *off += 2;
+            int start = *off;
+            Object *parent = ctx->node;
+            parent->obj_len = len;
 
-        while((*off - start) < len){
-            Object *new_node = NewObject();
-            if(*off == start)
-                parent->child = new_node;
-            else
-                ctx->node->next = new_node;
-            ctx->node = new_node;
-            ctx->node->isKey = TRUE; 
-            ParseDispatcher(ctx);//key
-            ctx->node->isKey = FALSE; 
-            ParseDispatcher(ctx);//value
-            ctx->node->isKey = TRUE;//set flag key-value
-            ctx->node = new_node;
+            while((*off - start) < len){
+               Object *new_node = NewObject();
+               if(*off == start)
+                   parent->child = new_node;
+               else
+                   ctx->node->next = new_node;
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE; 
+               ParseDispatcher(ctx);//key
+               ctx->node->isKey = FALSE; 
+               ParseDispatcher(ctx);//value
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE;//set flag key-value
+            }
+            
+            break;
         }
-    }else if(head == 0xC9){
-        len = (*(index + 1) << 24) | (*(index + 2) << 16) | (*(index + 3) << 8) | *(index + 4); 
-        *off += 6;
-        int start = *off;
-        Object *parent = ctx->node;
+        case 0xD6:
+        {
+            len = 4; 
+            *off += 2;
+            int start = *off;
+            Object *parent = ctx->node;
+            parent->obj_len = len;
 
-        while((*off - start) < len){
-            Object *new_node = NewObject();
-            if(*off == start)
-                parent->child = new_node;
-            else
-                ctx->node->next = new_node;
-            ctx->node = new_node;
-            ctx->node->isKey = TRUE; 
-            ParseDispatcher(ctx);//key
-            ctx->node->isKey = FALSE; 
-            ParseDispatcher(ctx);//value
-            ctx->node->isKey = TRUE;//set flag key-value
-            ctx->node = new_node;
+            while((*off - start) < len){
+               Object *new_node = NewObject();
+               if(*off == start)
+                   parent->child = new_node;
+               else
+                   ctx->node->next = new_node;
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE; 
+               ParseDispatcher(ctx);//key
+               ctx->node->isKey = FALSE; 
+               ParseDispatcher(ctx);//value
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE;//set flag key-value
+            }
+            
+            break;
+
         }
-    }
-    else{
-        printf("0x%x unimplement\n", head);
+        case 0xD7:
+        {
+            len = 8; 
+            *off += 2;
+            int start = *off;
+            Object *parent = ctx->node;
+            parent->obj_len = len;
+
+            while((*off - start) < len){
+               Object *new_node = NewObject();
+               if(*off == start)
+                   parent->child = new_node;
+               else
+                   ctx->node->next = new_node;
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE; 
+               ParseDispatcher(ctx);//key
+               ctx->node->isKey = FALSE; 
+               ParseDispatcher(ctx);//value
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE;//set flag key-value
+            }
+            
+            break;
+        }
+        case 0xD8:
+        {
+            len = 16; 
+            *off += 2;
+            int start = *off;
+            Object *parent = ctx->node;
+            parent->obj_len = len;
+
+            while((*off - start) < len){
+               Object *new_node = NewObject();
+               if(*off == start)
+                   parent->child = new_node;
+               else
+                   ctx->node->next = new_node;
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE; 
+               ParseDispatcher(ctx);//key
+               ctx->node->isKey = FALSE; 
+               ParseDispatcher(ctx);//value
+               ctx->node = new_node;
+               ctx->node->isKey = TRUE;//set flag key-value
+            }
+            
+            break;
+
+        }
+        case 0xC7:
+        {
+            len = *(index + 1); 
+            *off += 3;
+            int start = *off;
+            Object *parent = ctx->node;
+            parent->obj_len = len;
+
+             while((*off - start) < len){
+                Object *new_node = NewObject();
+                if(*off == start)
+                    parent->child = new_node;
+                else
+                    ctx->node->next = new_node;
+                ctx->node = new_node;
+                ctx->node->isKey = TRUE; 
+                ParseDispatcher(ctx);//key
+                ctx->node->isKey = FALSE; 
+                ParseDispatcher(ctx);//value
+                ctx->node = new_node;
+                ctx->node->isKey = TRUE;//set flag key-value
+            }
+            
+            break;
+        }
+        case 0xC8:
+        {
+            len = (*(index + 1) << 8) | *(index + 2); 
+            *off += 4;
+            int start = *off;
+            Object *parent = ctx->node;
+
+            while((*off - start) < len){
+                Object *new_node = NewObject();
+                if(*off == start)
+                    parent->child = new_node;
+                 else
+                    ctx->node->next = new_node;
+                 ctx->node = new_node;
+                 ctx->node->isKey = TRUE; 
+                 ParseDispatcher(ctx);//key
+                 ctx->node->isKey = FALSE; 
+                 ParseDispatcher(ctx);//value
+                 ctx->node = new_node;
+                 ctx->node->isKey = TRUE;//set flag key-value
+            }
+
+            break;
+        }
+        case 0xC9:
+        {
+            len = (*(index + 1) << 24) | (*(index + 2) << 16) | (*(index + 3) << 8) | *(index + 4); 
+            *off += 6;
+            int start = *off;
+            Object *parent = ctx->node;
+
+            while((*off - start) < len){
+                Object *new_node = NewObject();
+                if(*off == start)
+                    parent->child = new_node;
+                 else
+                    ctx->node->next = new_node;
+                ctx->node = new_node;
+                ctx->node->isKey = TRUE; 
+                ParseDispatcher(ctx);//key
+                ctx->node->isKey = FALSE; 
+                ParseDispatcher(ctx);//value
+                ctx->node = new_node;
+                ctx->node->isKey = TRUE;//set flag key-value
+            }
+
+            break;
+        }
+
+        default:
+        {
+            printf("0x%x unimplement\n", head);
+        }
     }
    
 }/*}}}*/
@@ -114,18 +256,60 @@ void ParseMap(Context *ctx){/*{{{*/
             ParseDispatcher(ctx);//key
             ctx->node->isKey = FALSE;
             ParseDispatcher(ctx);//value
-            ctx->node->isKey = TRUE;//set flag key-value
             ctx->node = new_node;
+            ctx->node->isKey = TRUE;//set flag key-value
         }
+
+        return;
     }
 
     if(head == 0xDE){
-        printf("0xde unimplement\n");
+        len = (*(index + 1) << 8) | *(index + 2); 
+        *off += 3;
+        Object *parent = ctx->node;
+        parent->obj_len = len;
+        for(i = 0; i < len; i++){
+            Object *new_node = NewObject();
+            if(0 == i)
+                parent->child = new_node;
+            else
+                ctx->node->next = new_node;
+            ctx->node = new_node;
+            ctx->node->isKey = TRUE;
+            ParseDispatcher(ctx);//key
+            ctx->node->isKey = FALSE;
+            ParseDispatcher(ctx);//value
+            ctx->node = new_node;
+            ctx->node->isKey = TRUE;//set flag key-value
+        }
+
+        return;
     }
 
     if(head == 0xDF){
-        printf("0xdf unimplement\n");
+        len = (*(index + 1) << 24) | (*(index + 2) << 16) | (*(index + 3) << 8) | *(index + 4); 
+        *off += 5;
+        Object *parent = ctx->node;
+        parent->obj_len = len;
+        for(i = 0; i < len; i++){
+            Object *new_node = NewObject();
+            if(0 == i)
+                parent->child = new_node;
+            else
+                ctx->node->next = new_node;
+            ctx->node = new_node;
+            ctx->node->isKey = TRUE;
+            ParseDispatcher(ctx);//key
+            ctx->node->isKey = FALSE;
+            ParseDispatcher(ctx);//value
+            ctx->node = new_node;
+            ctx->node->isKey = TRUE;//set flag key-value
+        }
+
+        return;
     }
+
+    printf("0x%x unimplement\n", head);
 }/*}}}*/
 
 void ParseArray(Context *ctx){/*{{{*/
@@ -147,15 +331,46 @@ void ParseArray(Context *ctx){/*{{{*/
                 ctx->node->next = new_node;
             ctx->node = new_node;
             ParseDispatcher(ctx);
-            ctx->node = new_node;
+            ctx->node = new_node;//reset ctx->node as the new_node
         }
+        return;
     }
     if(head == 0xDC){
-        printf("0xdc unimplement\n");
+        len = (*(index + 1) << 8) | *(index + 2); 
+        *off += 3;
+        Object *parent = ctx->node;
+        parent->obj_len = len;
+        for(i = 0; i < len; i++){
+            Object *new_node = NewObject();
+            if(0 == i)
+                parent->child = new_node;
+            else
+                ctx->node->next = new_node;
+            ctx->node = new_node;
+            ParseDispatcher(ctx);
+            ctx->node = new_node;//reset ctx->node as the new_node
+        }
+        return;
     }
     if(head == 0xDD){
-        printf("0xdd unimplement\n");
+        len = (*(index + 1) << 24) | (*(index + 2) << 16) | (*(index + 3) << 8) | *(index + 4); 
+        *off += 5;
+        Object *parent = ctx->node;
+        parent->obj_len = len;
+        for(i = 0; i < len; i++){
+            Object *new_node = NewObject();
+            if(0 == i)
+                parent->child = new_node;
+            else
+                ctx->node->next = new_node;
+            ctx->node = new_node;
+            ParseDispatcher(ctx);
+            ctx->node = new_node;//reset ctx->node as the new_node
+        }
+        return;
     }
+
+    printf("0x%x unimplement\n", head);
 }/*}}}*/
 
 void ParseBin(Context *ctx){/*{{{*/
@@ -171,7 +386,7 @@ void ParseBin(Context *ctx){/*{{{*/
             ctx->node->obj_len = len;
             printf("len: %d\n", len);
             bin = (ubyte_t *) malloc(sizeof(ubyte_t)*len);
-            memcpy(bin, (index+ 2), len);
+            memcpy(bin, (index + 2), len);
             ctx->node->value.bin_val = bin;
             *off += (len + 1);
             break;
@@ -179,18 +394,20 @@ void ParseBin(Context *ctx){/*{{{*/
             len = (*(index+1)<<8) | *(index+2);
             printf("len: %d\n", len);
             bin = (ubyte_t *) malloc(sizeof(ubyte_t)*len);
-            memcpy(bin, (index+3), len);
+            memcpy(bin, (index + 3), len);
             ctx->node->value.bin_val = bin;
-            *off += (len + 1);
+            *off += (len + 3);
             break;
         case 0xC6:
             len = (*(index + 1)<<24) | (*(index + 2)<<16) | (*(index + 3)<<8) | *(index + 4);
             printf("len: %d\n", len);
             bin = (ubyte_t*) malloc(sizeof(ubyte_t)*len);
-            memcpy(bin, (index+5), len);
+            memcpy(bin, (index + 5), len);
             ctx->node->value.bin_val = bin;
-            *off += (len+ 1);
+            *off += (len+ 5);
             break;
+        default:
+            printf("0x%x unimplement\n", head);
     }
 }/*}}}*/
 
@@ -224,7 +441,7 @@ void ParseString(Context *ctx){/*{{{*/
             printf("len: %d\n", len);
             str = (char *) malloc(sizeof(char)*len);
             memcpy(str, (index + 2), len);
-            *off += (len + 1);
+            *off += (len + 2);
             if(ctx->node->isKey == FALSE){
                 ctx->node->obj_len = len;
                 ctx->node->value.str_val = str;
@@ -239,7 +456,7 @@ void ParseString(Context *ctx){/*{{{*/
             printf("len: %d\n", len);
             str = (char *) malloc(sizeof(char)*len);
             memcpy(str, (index + 3), len);
-            *off += (len + 1);
+            *off += (len + 3);
             if(ctx->node->isKey == FALSE){
                 ctx->node->obj_len = len;
                 ctx->node->value.str_val = str;
@@ -254,7 +471,7 @@ void ParseString(Context *ctx){/*{{{*/
             printf("len: %d\n", len);
             str = (char *) malloc(sizeof(char)*len);
             memcpy(str, (index + 5), len);
-            *off += (len+ 1);
+            *off += (len + 5);
             if(ctx->node->isKey == FALSE){
                 ctx->node->obj_len = len;
                 ctx->node->value.str_val = str;
@@ -263,6 +480,8 @@ void ParseString(Context *ctx){/*{{{*/
                 ctx->node->key.str_val = str;
             }
             return;
+        default:
+            printf("0x%x unimplement\n", head);
     }
 }/*}}}*/
 
@@ -275,6 +494,8 @@ void ParseBool(Context *ctx){/*{{{*/
         ctx->node->value.bool_val = TRUE;
     else if(head == 0xC3)
         ctx->node->value.bool_val = FALSE;
+    else
+        printf("0x%x unimplement\n", head);
 }/*}}}*/
 
 void ParseNil(Context *ctx){/*{{{*/
@@ -282,9 +503,13 @@ void ParseNil(Context *ctx){/*{{{*/
     int *off = &ctx->off;
     ubyte_t head = *index;
     *off += 1;
-    if(head == 0xC0)
+    if(head == 0xC0){
+        ctx->node->value.bin_val = 0;
         return; 
-    return;
+    }
+    else
+        printf("0x%x unimplement\n", head);
+
 }/*}}}*/
 
 void ParseInteger(Context *ctx){/*{{{*/
@@ -433,6 +658,8 @@ void ParseInteger(Context *ctx){/*{{{*/
                 ctx->node->key.int64_val = val_64;
             }
         }
+        default:
+            printf("0x%x unimplement\n", head);
     }
 }/*}}}*/
 
@@ -462,9 +689,10 @@ void ParseFloat(Context *ctx){/*{{{*/
             float_union.double_buf[i] = *(index + 8 - i);
         }
         *off += 9;
-        ctx->node->value.float_val = float_union.double_tmp;
+        ctx->node->value.double_val = float_union.double_tmp;
         return;
     }
+        printf("0x%x unimplement\n", head);
 }/*}}}*/
 
 void  ParseDispatcher(Context *ctx){/*{{{*/
@@ -513,7 +741,7 @@ void  ParseDispatcher(Context *ctx){/*{{{*/
 
     switch(head & 0xFF){
         case 0xC0:
-            ctx->node->obj_type = OBJ_TYPE_MAP;
+            ctx->node->obj_type = OBJ_TYPE_NIL;
             ParseNil(ctx);
             printf("NIL\n");
             return;

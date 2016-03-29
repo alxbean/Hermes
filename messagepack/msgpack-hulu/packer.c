@@ -352,7 +352,7 @@ void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
             case OBJ_TYPE_STR:
                 PackString(pb, obj->key_len);
                 PackStringBody(pb, obj->key.str_val, obj->key_len);
-                printf("str_val:%s\n", obj->value.str_val);
+                printf("str_val:%s\n", obj->key.str_val);
                 break;
             case OBJ_TYPE_INT8:
                 PackFixInt8(pb, obj->key.int8_val);
