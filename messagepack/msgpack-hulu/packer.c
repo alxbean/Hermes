@@ -506,14 +506,147 @@ PackBuffer *MessagePacker(Object *obj){
         return pb;
 } 
 
-void printBlack(int n){
+void printBlank(int n){
     int i = 0;
-    for(i = 0; i < n*2; i++){
-        printf("  ");
+    for(i = 0; i < n; i++){
+        printf(" ");
     }
 }
 
-void printTree(Object *obj, int level){/*{{{*/
+void printTree(Object *obj, int space){/*{{{*/
+    printBlank(space);
+    char a[100] = {0};
+    char b[100] = {0};
+    int len = 0;
+    
+    if(obj->isKey == TRUE){
+        switch(obj->key_type){
+            case OBJ_TYPE_STR:
+                snprintf(a, sizeof(a), "\"%s\" : ", obj->key.str_val);
+                break;
+            case OBJ_TYPE_INT8:
+                snprintf(a, sizeof(a), "(int8)%d : ", obj->key.int8_val);
+                break;
+            case OBJ_TYPE_INT16:
+                snprintf(a, sizeof(a), "(int16)%d : ", obj->key.int16_val);
+                break;
+            case OBJ_TYPE_INT32:
+                snprintf(a, sizeof(a), "(int32)%d : ", obj->key.int32_val);
+                break;
+            case OBJ_TYPE_INT64:
+                snprintf(a, sizeof(a), "(int64)%ld : ", obj->key.int64_val);
+                break;
+            case OBJ_TYPE_UINT8:
+                snprintf(a, sizeof(a), "(uint8)%u : ", obj->key.uint8_val);
+                break;
+            case OBJ_TYPE_UINT16:
+                snprintf(a, sizeof(a), "(uint16)%u : ", obj->key.uint16_val);
+                break;
+            case OBJ_TYPE_UINT32:
+                snprintf(a, sizeof(a), "(uint32)%u : ", obj->key.uint32_val);
+                break;
+            case OBJ_TYPE_UINT64:
+                snprintf(a, sizeof(a), "(uint64)%lu : ", obj->key.uint64_val);
+                break;
+            case OBJ_TYPE_POSITIVE_INT:
+                snprintf(a, sizeof(a), "(fixInt)%u : ", obj->key.uint8_val);
+                break;
+            case OBJ_TYPE_NEGATIVE_INT:
+                snprintf(a, sizeof(a), "(fixInt)%d : ", obj->key.int8_val);
+                break;
+            default:
+                break;
+        }
+
+        printf("%s", a);
+        len += strlen(a);
+    }
+                                                  
+    switch(obj->obj_type){
+        case OBJ_TYPE_STR:
+            snprintf(b, sizeof(b), "\"%s\"", obj->value.str_val);
+            break;
+        case OBJ_TYPE_NIL:
+            snprintf(b, sizeof(b), "(NULL)");
+            break;
+        case OBJ_TYPE_TRUE:
+            snprintf(b, sizeof(b), "(TRUE:%d)", obj->value.bool_val);
+            break;
+        case OBJ_TYPE_FALSE:
+            snprintf(b, sizeof(b), "(FALSE:%d)", obj->value.bool_val);
+            break;
+        case OBJ_TYPE_BIN:
+            snprintf(b, sizeof(b), "(BIN)\"%s\"", obj->value.bin_val);
+            break;
+        case OBJ_TYPE_FLOAT:
+            snprintf(b, sizeof(b), "(float)%f", obj->value.float_val);
+            break;
+        case OBJ_TYPE_DOUBLE:
+            snprintf(b, sizeof(b), "(double)%lf", obj->value.double_val);
+            break;
+        case OBJ_TYPE_POSITIVE_INT:
+            snprintf(b, sizeof(b), "(fixInt)%u", obj->value.uint8_val);
+            break;
+        case OBJ_TYPE_NEGATIVE_INT:
+            snprintf(b, sizeof(b), "(fixInt)%d", obj->value.int8_val);
+            break;
+        case OBJ_TYPE_INT8:
+            snprintf(b, sizeof(b), "(int8)%d", obj->value.int8_val);
+            break;
+        case OBJ_TYPE_INT16:
+            snprintf(b, sizeof(b), "(int16)%d", obj->value.int16_val);
+            break;
+        case OBJ_TYPE_INT32:
+            snprintf(b, sizeof(b), "(int32)%d", obj->value.int32_val);
+            break;
+        case OBJ_TYPE_INT64:
+            snprintf(b, sizeof(b), "(int64)%ld", obj->value.int64_val);
+            break;
+        case OBJ_TYPE_UINT8:
+            snprintf(b, sizeof(b), "(uint8)%u", obj->value.uint8_val);
+            break;
+        case OBJ_TYPE_UINT16:
+            snprintf(b, sizeof(b), "(uint16)%u", obj->value.uint16_val);
+            break;
+        case OBJ_TYPE_UINT32:
+            snprintf(b, sizeof(b), "(uint32)%u", obj->value.uint32_val);
+            break;
+        case OBJ_TYPE_UINT64:
+            snprintf(b, sizeof(b),"(uint64)%lu", obj->value.uint64_val);
+            break;
+        case OBJ_TYPE_ARRAY:
+            snprintf(b, sizeof(b), "Array(%d):", obj->obj_len);
+            break;
+        case OBJ_TYPE_MAP:
+            snprintf(b, sizeof(b), "Map(%d):", obj->obj_len);
+            break;
+        case OBJ_TYPE_EXT:
+            snprintf(b, sizeof(b), "EXT(%d):", obj->obj_len);
+            break;
+        default:
+            break;
+    }
+
+    printf("%s", b);
+    len += strlen(b);
+
+    if(obj->child != NULL){
+        printf("|\n");
+        if(obj->obj_type == OBJ_TYPE_ARRAY){
+            printTree(obj->child, space+len);
+        } else{
+            printTree(obj->child, space+len);
+        }
+    }
+
+    if(obj->next != NULL){
+        printf("\n");
+        printTree(obj->next, space);
+    }
+        
+}/*}}}*/
+
+void printJSON(Object *obj){/*{{{*/
     if(obj->isKey == TRUE){
         switch(obj->key_type){
             case OBJ_TYPE_STR:
@@ -622,18 +755,18 @@ void printTree(Object *obj, int level){/*{{{*/
     if(obj->child != NULL){
         if(obj->obj_type == OBJ_TYPE_ARRAY){
             printf("[");
-            printTree(obj->child, level++);
+            printJSON(obj->child);
             printf("]");
         } else{
             printf("{");
-            printTree(obj->child, level++);
+            printJSON(obj->child);
             printf("}");
         }
     }
 
     if(obj->next != NULL){
         printf(", ");
-        printTree(obj->next, level);
+        printJSON(obj->next);
     }
         
 }/*}}}*/
