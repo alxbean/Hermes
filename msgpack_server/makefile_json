@@ -1,0 +1,3 @@
+cJSON_SRC = -I./cJSON/
+server_json: cJSON.o server_json.c
+	gcc server_json.c cJSON.o $(cJSON_SRC) -g -lm -o server_json
