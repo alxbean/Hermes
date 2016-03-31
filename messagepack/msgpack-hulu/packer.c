@@ -352,47 +352,47 @@ void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
             case OBJ_TYPE_STR:
                 PackString(pb, obj->key_len);
                 PackStringBody(pb, obj->key.str_val, obj->key_len);
-                printf("str_val:%s\n", obj->key.str_val);
+                printf("(str_val)\"%s\" -> ", obj->key.str_val);
                 break;
             case OBJ_TYPE_INT8:
                 PackFixInt8(pb, obj->key.int8_val);
-                printf("int8: %d\n", obj->key.int8_val);
+                printf("(int8)%d -> ", obj->key.int8_val);
                 break;
             case OBJ_TYPE_INT16:
                 PackFixInt16(pb, obj->key.int16_val);
-                printf("int16: %d\n", obj->key.int16_val);
+                printf("(int16)%d -> ", obj->key.int16_val);
                 break;
             case OBJ_TYPE_INT32:
                 PackFixInt32(pb, obj->key.int32_val);
-                printf("int32: %d\n", obj->key.int32_val);
+                printf("(int32)%d -> ", obj->key.int32_val);
                 break;
             case OBJ_TYPE_INT64:
                 PackFixInt64(pb, obj->key.int64_val);
-                printf("int64: %ld\n", obj->key.int64_val);
+                printf("(int64)%ld -> ", obj->key.int64_val);
                 break;
             case OBJ_TYPE_UINT8:
                 PackFixInt8_u(pb, obj->key.uint8_val);
-                printf("uint8: %u\n", obj->key.uint8_val);
+                printf("(uint8)%u -> ", obj->key.uint8_val);
                 break;
             case OBJ_TYPE_UINT16:
                 PackFixInt16_u(pb, obj->key.uint16_val); 
-                printf("uint16: %u\n", obj->key.uint16_val);
+                printf("(uint16)%u -> ", obj->key.uint16_val);
                 break;
             case OBJ_TYPE_UINT32:
                 PackFixInt32_u(pb, obj->key.uint32_val);
-                printf("uint32: %u\n", obj->key.uint32_val);
+                printf("(uint32)%u -> ", obj->key.uint32_val);
                 break;
             case OBJ_TYPE_UINT64:
                 PackFixInt64_u(pb, obj->key.uint64_val);
-                printf("uint64: %lu\n", obj->key.uint64_val);
+                printf("(uint64)%lu -> ", obj->key.uint64_val);
                 break;
             case OBJ_TYPE_POSITIVE_INT:
                 PackFixNumPositive(pb, obj->key.uint8_val);
-                printf("positive int: %u\n", obj->key.uint8_val);
+                printf("(fixInt)%u -> ", obj->key.uint8_val);
                 break;
             case OBJ_TYPE_NEGATIVE_INT:
                 PackFixNumNegative(pb, obj->key.int8_val);
-                printf("negative int: %d\n", obj->key.int8_val);
+                printf("(fixInt)%d -> ", obj->key.int8_val);
                 break;
             default:
                 break;
@@ -403,72 +403,72 @@ void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
         case OBJ_TYPE_STR:
             PackString(pb, obj->obj_len);
             PackStringBody(pb, obj->value.str_val, obj->obj_len);
-            printf("str_val:%s\n", obj->value.str_val);
+            printf("(str_val)\"%s\"\n", obj->value.str_val);
             break;
         case OBJ_TYPE_NIL:
             PackNil(pb);
-            printf("NULL\n");
+            printf("(NULL)\n");
             break;
         case OBJ_TYPE_TRUE:
             PackTrue(pb);
-            printf("TRUE:%d\n", obj->value.bool_val);
+            printf("(TRUE:%d)\n", obj->value.bool_val);
             break;
         case OBJ_TYPE_FALSE:
             PackFalse(pb);
-            printf("FALSE:%d\n", obj->value.bool_val);
+            printf("(FALSE:%d)\n", obj->value.bool_val);
             break;
         case OBJ_TYPE_BIN:
             PackBin(pb, obj->obj_len);
             PackBinBody(pb, &obj->value, obj->obj_len);
-            printf("BIN: %s\n", obj->value.bin_val);
+            printf("(BIN)\"%s\"\n", obj->value.bin_val);
             break;
         case OBJ_TYPE_FLOAT:
             PackFloat(pb, obj->value.float_val);
-            printf("float: %f\n", obj->value.float_val);
+            printf("(float)%f\n", obj->value.float_val);
             break;
         case OBJ_TYPE_DOUBLE:
             PackDouble(pb, obj->value.double_val);
-            printf("double: %lf\n", obj->value.double_val);
+            printf("(double)%lf\n", obj->value.double_val);
             break;
         case OBJ_TYPE_POSITIVE_INT:
             PackFixNumPositive(pb, obj->value.uint8_val);
-            printf("positive int: %u\n", obj->value.uint8_val);
+            printf("(fixInt)%u\n", obj->value.uint8_val);
             break;
         case OBJ_TYPE_NEGATIVE_INT:
             PackFixNumNegative(pb, obj->value.int8_val);
-            printf("negative int: %d\n", obj->value.int8_val);
+            printf("(fixInt)%d\n", obj->value.int8_val);
             break;
         case OBJ_TYPE_INT8:
             PackFixInt8(pb, obj->value.int8_val);
-            printf("int8: %d\n", obj->value.int8_val);
+            printf("(int8)%d\n", obj->value.int8_val);
             break;
         case OBJ_TYPE_INT16:
             PackFixInt16(pb, obj->value.int16_val);
-            printf("int16: %d\n", obj->value.int16_val);
+            printf("(int16)%d\n", obj->value.int16_val);
             break;
         case OBJ_TYPE_INT32:
             PackFixInt32(pb, obj->value.int32_val);
-            printf("int32: %d\n", obj->value.int32_val);
+            printf("(int32)%d\n", obj->value.int32_val);
             break;
         case OBJ_TYPE_INT64:
             PackFixInt64(pb, obj->value.int64_val);
-            printf("int64: %ld\n", obj->value.int64_val);
+            printf("(int64)%ld\n", obj->value.int64_val);
             break;
         case OBJ_TYPE_UINT8:
             PackFixInt8_u(pb, obj->value.uint8_val);
-            printf("uint8: %u\n", obj->value.uint8_val);
+            printf("(uint8)%u\n", obj->value.uint8_val);
             break;
         case OBJ_TYPE_UINT16:
             PackFixInt16_u(pb, obj->value.uint16_val); 
-            printf("uint16: %u\n", obj->value.uint16_val);
+            printf("(uint16)%u\n", obj->value.uint16_val);
             break;
         case OBJ_TYPE_UINT32:
             PackFixInt32_u(pb, obj->value.uint32_val);
-            printf("uint32: %u\n", obj->value.uint32_val);
+            printf("(uint32)%u\n", obj->value.uint32_val);
             break;
         case OBJ_TYPE_UINT64:
             PackFixInt64_u(pb, obj->value.uint64_val);
-            printf("uint64: %lu\n", obj->value.uint64_val);
+            printf("(uint64)%lu\n", obj->value.uint64_val);
             break;
         case OBJ_TYPE_ARRAY:
             PackArray(pb, obj->obj_len);
@@ -487,10 +487,12 @@ void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
     }
 
     if(obj->child != NULL){
+        printf("child:\n");
         PackMessage(pb, obj->child);
     }
 
     if(obj->next != NULL){
+        printf("next:\n");
         PackMessage(pb, obj->next);
     }
         
@@ -502,7 +504,139 @@ PackBuffer *MessagePacker(Object *obj){
         PackMessage(pb, obj);
 
         return pb;
+} 
+
+void printBlack(int n){
+    int i = 0;
+    for(i = 0; i < n*2; i++){
+        printf("  ");
+    }
 }
+
+void printTree(Object *obj, int level){/*{{{*/
+    if(obj->isKey == TRUE){
+        switch(obj->key_type){
+            case OBJ_TYPE_STR:
+                printf("\"%s\" : ", obj->key.str_val);
+                break;
+            case OBJ_TYPE_INT8:
+                printf("(int8)%d : ", obj->key.int8_val);
+                break;
+            case OBJ_TYPE_INT16:
+                printf("(int16)%d : ", obj->key.int16_val);
+                break;
+            case OBJ_TYPE_INT32:
+                printf("(int32)%d : ", obj->key.int32_val);
+                break;
+            case OBJ_TYPE_INT64:
+                printf("(int64)%ld : ", obj->key.int64_val);
+                break;
+            case OBJ_TYPE_UINT8:
+                printf("(uint8)%u : ", obj->key.uint8_val);
+                break;
+            case OBJ_TYPE_UINT16:
+                printf("(uint16)%u : ", obj->key.uint16_val);
+                break;
+            case OBJ_TYPE_UINT32:
+                printf("(uint32)%u : ", obj->key.uint32_val);
+                break;
+            case OBJ_TYPE_UINT64:
+                printf("(uint64)%lu : ", obj->key.uint64_val);
+                break;
+            case OBJ_TYPE_POSITIVE_INT:
+                printf("(fixInt)%u : ", obj->key.uint8_val);
+                break;
+            case OBJ_TYPE_NEGATIVE_INT:
+                printf("(fixInt)%d : ", obj->key.int8_val);
+                break;
+            default:
+                break;
+        }
+    }
+                                                  
+    switch(obj->obj_type){
+        case OBJ_TYPE_STR:
+            printf("\"%s\"", obj->value.str_val);
+            break;
+        case OBJ_TYPE_NIL:
+            printf("(NULL)");
+            break;
+        case OBJ_TYPE_TRUE:
+            printf("(TRUE:%d)", obj->value.bool_val);
+            break;
+        case OBJ_TYPE_FALSE:
+            printf("(FALSE:%d)", obj->value.bool_val);
+            break;
+        case OBJ_TYPE_BIN:
+            printf("(BIN)\"%s\"", obj->value.bin_val);
+            break;
+        case OBJ_TYPE_FLOAT:
+            printf("(float)%f", obj->value.float_val);
+            break;
+        case OBJ_TYPE_DOUBLE:
+            printf("(double)%lf", obj->value.double_val);
+            break;
+        case OBJ_TYPE_POSITIVE_INT:
+            printf("(fixInt)%u", obj->value.uint8_val);
+            break;
+        case OBJ_TYPE_NEGATIVE_INT:
+            printf("(fixInt)%d", obj->value.int8_val);
+            break;
+        case OBJ_TYPE_INT8:
+            printf("(int8)%d", obj->value.int8_val);
+            break;
+        case OBJ_TYPE_INT16:
+            printf("(int16)%d", obj->value.int16_val);
+            break;
+        case OBJ_TYPE_INT32:
+            printf("(int32)%d", obj->value.int32_val);
+            break;
+        case OBJ_TYPE_INT64:
+            printf("(int64)%ld", obj->value.int64_val);
+            break;
+        case OBJ_TYPE_UINT8:
+            printf("(uint8)%u", obj->value.uint8_val);
+            break;
+        case OBJ_TYPE_UINT16:
+            printf("(uint16)%u", obj->value.uint16_val);
+            break;
+        case OBJ_TYPE_UINT32:
+            printf("(uint32)%u", obj->value.uint32_val);
+            break;
+        case OBJ_TYPE_UINT64:
+            printf("(uint64)%lu", obj->value.uint64_val);
+            break;
+        case OBJ_TYPE_ARRAY:
+            printf("Array(%d):", obj->obj_len);
+            break;
+        case OBJ_TYPE_MAP:
+            printf("Map(%d):", obj->obj_len);
+            break;
+        case OBJ_TYPE_EXT:
+            printf("EXT(%d):", obj->obj_len);
+            break;
+        default:
+            break;
+    }
+
+    if(obj->child != NULL){
+        if(obj->obj_type == OBJ_TYPE_ARRAY){
+            printf("[");
+            printTree(obj->child, level++);
+            printf("]");
+        } else{
+            printf("{");
+            printTree(obj->child, level++);
+            printf("}");
+        }
+    }
+
+    if(obj->next != NULL){
+        printf(", ");
+        printTree(obj->next, level);
+    }
+        
+}/*}}}*/
 
 void print(const ubyte_t *buf, unsigned int len){
     size_t i = 0;
