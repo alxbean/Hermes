@@ -8,7 +8,7 @@
 //#include <msgpack.h>
 //#include "../../githup/MessagePack/messagepack/msgpack-c/src/objectc.c"
 //#include "../../githup/MessagePack/messagepack/msgpack-hulu/parser.c"
-#include "../../githup/MessagePack/messagepack/msgpack-hulu/packer.c"
+#include "../messagepack/msgpack-hulu/packer.c"
 
 /*
 #include <sys/types.h>
@@ -124,6 +124,20 @@ int main(int argc, char **argv)
         printJSON(obj);
         printf("============printTree==============\n");
         printTree(obj, 0);
+        printf("\n\n============findNode==============\n");
+        char a[100] = "age";
+        Object_Value ov;
+        ov.str_val = a;
+
+        char a1[100] = "name";
+        Object_Value ov1;
+        ov1.str_val = a1;
+
+        Object *resObj = FindNode(obj, 1, OBJ_TYPE_STR, ov); 
+        if(resObj != NULL)
+            printf("Find ====>  %s : %d\n", a, resObj->value.int8_val);
+        else
+            printf("Not Found~!\n");
         printf("\n-----------------Response:%d-----------------\n",new_server_socket);
         print(pb->buffer, pb->off);
         const ubyte_t *response = pb->buffer; 

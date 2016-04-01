@@ -69,7 +69,7 @@ extern "C" {
         ubyte_t *buf;
         int off;
     }Context; 
-    
+
 //Interfce
     void ParseDispatcher(Context *ctx);
     Object * NewObject();

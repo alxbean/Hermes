@@ -8,39 +8,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdarg.h>
 
-typedef unsigned char uint8_t;
+double average(int count, ...){
+    va_list ap;
+    int j;
+    double tot = 0;
+    va_start(ap, count);
+    for(j=0; j<count; j++){
+        tot += va_arg(ap, double);
+    }
 
-typedef struct {
-    uint8_t size;
-    const char *ptr;
-} msgpack_object_str;
+    va_end(ap);
 
-
-typedef union{
-    int a;
-    msgpack_object_str str; 
-} msgpack_object_union;
-
-typedef struct {
-    uint8_t TYPE;
-    msgpack_object_union via;
-} msgpack_object;
-
-char * k(char * b){
-    printf("%s\n",b);
-    char a[] = {'1', '2', '3'};
-    printf("%s\n",a);
-    return b;
+    return tot;
 }
 
-
 int main(){
-    uint8_t test[] = {0xAA, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x77, 0x6F, 0x72, 0x6C, 0x64};
-
-    unsigned char t[] = {0x07, 0x01, 0x00, 0x15}; 
-    uint16_t k = (uint16_t ) ((t[0] << 8) + t[1]); 
-
-    uint32_t i = 305419896;
-    printf("%2x %2x %2x %2x\n", i&0xff, (i>>8)&0xff, (i>>16)&0xff, (i>>24)&0xff);
+    double k = average(3, 1.1, 2.2, 3.3);
+    printf("%f\n", k);
+    return 0;
 }

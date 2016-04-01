@@ -6,6 +6,7 @@
  ************************************************************************/
 
 #include <stdio.h>
+#include <stdarg.h>
 //#include "unpacker.c"
 #include "./include/packer.h"
 
@@ -771,69 +772,94 @@ void printJSON(Object *obj){/*{{{*/
         
 }/*}}}*/
 
-Object * FindNode(Object *obj, Object_Type keyType, Object_Value keyValue){/*{{{*/
+
+Object * HitNode(Object *obj, Object_Type keyType, Object_Value keyValue){/*{{{*/
     if(obj->isKey == TRUE){
         switch(keyType){
             case OBJ_TYPE_STR:
-                printf("\"%s\" : \"%s\"", keyValue.str_val, obj->key.str_val);
+                printf("\"%s\" : \"%s\"\n", keyValue.str_val, obj->key.str_val);
                 if(strncmp(obj->key.str_val, keyValue.str_val, obj->key_len) == 0)
                     return obj;
+                break;
             case OBJ_TYPE_INT8:
-                printf("(int8): %d : %d", keyValue.int8_val, obj->key.int8_val);
+                printf("(int8): %d : %d\n", keyValue.int8_val, obj->key.int8_val);
                 if(keyValue.int8_val == obj->key.int8_val)
                     return obj;
+                break;
             case OBJ_TYPE_INT16:
-                printf("(int16): %d : %d", keyValue.int16_val, obj->key.int16_val);
+                printf("(int16): %d : %d\n", keyValue.int16_val, obj->key.int16_val);
                 if(keyValue.int16_val == obj->key.int16_val)
                     return obj;
+                break;
             case OBJ_TYPE_INT32:
-                printf("(int32): %d : %d", keyValue.int32_val, obj->key.int32_val);
+                printf("(int32): %d : %d\n", keyValue.int32_val, obj->key.int32_val);
                 if(keyValue.int16_val == obj->key.int16_val)
                     return obj;
+                break;
             case OBJ_TYPE_INT64:
-                printf("(int64): %ld : %ld", keyValue.int64_val, obj->key.int64_val);
+                printf("(int64): %ld : %ld\n", keyValue.int64_val, obj->key.int64_val);
                 if(keyValue.int64_val == obj->key.int64_val)
                     return obj;
+                break;
             case OBJ_TYPE_UINT8:
-                printf("(uint8): %u : %u", keyValue.uint8_val, obj->key.uint8_val);
+                printf("(uint8): %u : %u\n", keyValue.uint8_val, obj->key.uint8_val);
                 if(keyValue.uint8_val == obj->key.uint8_val)
                     return obj;
+                break;
             case OBJ_TYPE_UINT16:
-                printf("(uint16): %u : %u", keyValue.uint16_val, obj->key.uint16_val);
+                printf("(uint16): %u : %u\n", keyValue.uint16_val, obj->key.uint16_val);
                 if(keyValue.uint16_val == obj->key.uint16_val)
                     return obj;
+                break;
             case OBJ_TYPE_UINT32:
-                printf("(uint32): %u : %u", keyValue.uint32_val, obj->key.uint32_val);
+                printf("(uint32): %u : %u\n", keyValue.uint32_val, obj->key.uint32_val);
                 if(keyValue.uint32_val == obj->key.uint32_val)
                     return obj;
+                break;
             case OBJ_TYPE_UINT64:
-                printf("(uint64): %lu : %lu", keyValue.uint64_val, obj->key.uint64_val);
+                printf("(uint64): %lu : %lu\n", keyValue.uint64_val, obj->key.uint64_val);
                 if(keyValue.uint64_val == obj->key.uint64_val)
                     return obj;
+                break;
             case OBJ_TYPE_POSITIVE_INT:
-                printf("(fixInt): %u : %u", keyValue.uint8_val, obj->key.uint8_val);
+                printf("(fixInt): %u : %u\n", keyValue.uint8_val, obj->key.uint8_val);
                 if(keyValue.uint8_val == obj->key.uint8_val)
                     return obj;
+                break;
             case OBJ_TYPE_NEGATIVE_INT:
-                printf("(fixInt): %d : %d", keyValue.int8_val, obj->key.int8_val);
+                printf("(fixInt): %d : %d\n", keyValue.int8_val, obj->key.int8_val);
                 if(keyValue.int8_val == obj->key.int8_val)
                     return obj;
+                break;
             default:
                 printf("not found");
                 return NULL;
         }
     }
 
-    if(obj->child != NULL){
-        return FindNode(obj->child, keyType, keyValue);
-    }
-
-    if(obj->next != NULL){
-        return FindNode(obj->next, keyType, keyValue);
-    }
+    if(obj->next != NULL)
+       return HitNode(obj->next, keyType, keyValue); 
 
     return NULL;
 }/*}}}*/
+
+Object * FindNode(Object *root , int argc, ...){
+    va_list ap;
+    int i;
+    va_start(ap, argc);
+    Object *obj = root;
+    for(i=0; i<argc; i += 2){
+        if(obj != NULL && NULL != obj->child)
+            obj = obj->child;
+        else
+            return NULL;
+        Object_Type keyType = (Object_Type)va_arg(ap, int); 
+        Object_Value keyValue = va_arg(ap, Object_Value);
+        obj = HitNode(obj, keyType, keyValue);
+    }
+
+    return obj;
+}
 
 void print(const ubyte_t *buf, unsigned int len){
     size_t i = 0;
