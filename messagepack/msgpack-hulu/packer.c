@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-//#include "unpacker.c"
 #include "./include/packer.h"
 
 #define INIT_BUFFER_SIZE 8192
@@ -20,7 +19,39 @@
 
 //ENDIAN_BIG
 
-PackBuffer* NewPackBuffer(){
+//declare
+static PackBuffer* NewPackBuffer();
+static int PackAppendBuffer(PackBuffer *pb, const ubyte_t *buf, size_t len);
+static void PackString(PackBuffer *pb, size_t len);
+static void PackStringBody(PackBuffer *pb, const void* body, size_t len);
+static void PackFixNumPositive(PackBuffer *pb, uint8_t d);
+static void PackFixNumNegative(PackBuffer *pb, int8_t d);
+static void PackFixInt8_u(PackBuffer *pb, uint8_t d);
+static void PackFixInt16_u(PackBuffer *pb, uint16_t d);
+static void PackFixInt32_u(PackBuffer *pb, uint32_t d);
+static void PackFixInt64_u(PackBuffer *pb, uint64_t d);
+static void PackFixInt8(PackBuffer *pb, int8_t d);
+static void PackFixInt16(PackBuffer *pb, int16_t d);
+static void PackFixInt16(PackBuffer *pb, int16_t d);
+static void PackFixInt32(PackBuffer *pb, int32_t d);
+static void PackFixInt64(PackBuffer *pb, int64_t d);
+static void PackNil(PackBuffer *pb);
+static void PackTrue(PackBuffer *pb);
+static void PackFalse(PackBuffer *pb);
+static void PackFloat(PackBuffer *pb, float d);
+static void PackDouble(PackBuffer *pb, double d);
+static void PackArray(PackBuffer *pb, size_t n);
+static void PackMap(PackBuffer *pb, size_t n);
+static void PackBin(PackBuffer *pb, size_t len);
+static void PackBinBody(PackBuffer *pb, const void *body, size_t len);
+static void PackExt(PackBuffer *pb, size_t len, int8_t type);
+static void PackExtBody(PackBuffer *pb, const void *body, size_t len);
+static void PackMessage(PackBuffer *pb, Object *obj);
+static void printBlank(int n);
+static Object * HitNode(Object *obj, Object_Type keyType, Object_Value keyValue);
+
+//define
+static PackBuffer* NewPackBuffer(){
     PackBuffer * pb = (PackBuffer *) calloc(1, sizeof(PackBuffer)); 
     if( NULL == pb){
         perror("NewPackBuffer:");
@@ -30,7 +61,7 @@ PackBuffer* NewPackBuffer(){
     return pb;
 }
 
-int PackAppendBuffer(PackBuffer *pb, const ubyte_t *buf, size_t len){
+static int PackAppendBuffer(PackBuffer *pb, const ubyte_t *buf, size_t len){
     if(pb->alloc - pb->off < len){
         size_t nsize = (pb->alloc) ? pb->alloc*2 : INIT_BUFFER_SIZE;
         while(nsize < pb->off + len){
@@ -55,7 +86,7 @@ int PackAppendBuffer(PackBuffer *pb, const ubyte_t *buf, size_t len){
     return 0;
 }
 
-void PackString(PackBuffer *pb, size_t len){
+static void PackString(PackBuffer *pb, size_t len){
    if(len < 32){
        ubyte_t head = 0xa0 | (ubyte_t)len; 
        PackAppendBuffer(pb, &TAKE8_8(head), 1); 
@@ -80,24 +111,24 @@ void PackString(PackBuffer *pb, size_t len){
    }
 }
 
-void PackStringBody(PackBuffer *pb, const void* body, size_t len){
+static void PackStringBody(PackBuffer *pb, const void* body, size_t len){
     PackAppendBuffer(pb, (const ubyte_t*)body, len);
 }
 
-void PackFixNumPositive(PackBuffer *pb, uint8_t d){
+static void PackFixNumPositive(PackBuffer *pb, uint8_t d){
     PackAppendBuffer(pb, &TAKE8_8(d), 1);
 }
 
-void PackFixNumNegative(PackBuffer *pb, int8_t d){
+static void PackFixNumNegative(PackBuffer *pb, int8_t d){
     PackAppendBuffer(pb, &TAKE8_8(d), 1);
 }
 
-void PackFixInt8_u(PackBuffer *pb, uint8_t d){
+static void PackFixInt8_u(PackBuffer *pb, uint8_t d){
     ubyte_t buf[2] = {0xcc, TAKE8_8(d)};
     PackAppendBuffer(pb, buf, 2);
 }
 
-void PackFixInt16_u(PackBuffer *pb, uint16_t d){
+static void PackFixInt16_u(PackBuffer *pb, uint16_t d){
     ubyte_t buf[3];
     buf[0] = 0xcd;
     buf[1] = ((ubyte_t *)&d)[1];
@@ -105,7 +136,7 @@ void PackFixInt16_u(PackBuffer *pb, uint16_t d){
     PackAppendBuffer(pb, buf, 3);
 }
 
-void PackFixInt32_u(PackBuffer *pb, uint32_t d){
+static void PackFixInt32_u(PackBuffer *pb, uint32_t d){
     ubyte_t buf[5];
     buf[0] = 0xce;
     buf[1] = ((ubyte_t *)&d)[3];
@@ -115,7 +146,7 @@ void PackFixInt32_u(PackBuffer *pb, uint32_t d){
     PackAppendBuffer(pb, buf, 5);
 }
 
-void PackFixInt64_u(PackBuffer *pb, uint64_t d){
+static void PackFixInt64_u(PackBuffer *pb, uint64_t d){
     ubyte_t buf[9];
     buf[0] = 0xce;
     buf[1] = ((ubyte_t *)&d)[7];
@@ -129,12 +160,12 @@ void PackFixInt64_u(PackBuffer *pb, uint64_t d){
     PackAppendBuffer(pb, buf, 9);
 }
 
-void PackFixInt8(PackBuffer *pb, int8_t d){
+static void PackFixInt8(PackBuffer *pb, int8_t d){
     ubyte_t buf[2] = {0xd0, TAKE8_8(d)};
     PackAppendBuffer(pb, buf, 2);
 }
 
-void PackFixInt16(PackBuffer *pb, int16_t d){
+static void PackFixInt16(PackBuffer *pb, int16_t d){
     ubyte_t buf[3];
     buf[0] = 0xd1;
     buf[1] = ((ubyte_t *)&d)[1];
@@ -142,7 +173,7 @@ void PackFixInt16(PackBuffer *pb, int16_t d){
     PackAppendBuffer(pb, buf, 3);
 }
 
-void PackFixInt32(PackBuffer *pb, int32_t d){
+static void PackFixInt32(PackBuffer *pb, int32_t d){
     ubyte_t buf[5];
     buf[0] = 0xd2;
     buf[1] = ((ubyte_t *)&d)[3];
@@ -152,7 +183,7 @@ void PackFixInt32(PackBuffer *pb, int32_t d){
     PackAppendBuffer(pb, buf, 5);
 }
 
-void PackFixInt64(PackBuffer *pb, int64_t d){
+static void PackFixInt64(PackBuffer *pb, int64_t d){
     ubyte_t buf[9];
     buf[0] = 0xd3;
     buf[1] = ((ubyte_t *)&d)[7];
@@ -166,22 +197,22 @@ void PackFixInt64(PackBuffer *pb, int64_t d){
     PackAppendBuffer(pb, buf, 9);
 }
 
-void PackNil(PackBuffer *pb){
+static void PackNil(PackBuffer *pb){
     static const ubyte_t d = 0xc0;
     PackAppendBuffer(pb, &d, 1);
 }
 
-void PackTrue(PackBuffer *pb){
+static void PackTrue(PackBuffer *pb){
     static const ubyte_t d = 0xc3;
     PackAppendBuffer(pb, &d, 1);
 }
 
-void PackFalse(PackBuffer *pb){
+static void PackFalse(PackBuffer *pb){
     static const ubyte_t d = 0xc2;
     PackAppendBuffer(pb, &d, 1);
 }
 
-void PackFloat(PackBuffer *pb, float d){
+static void PackFloat(PackBuffer *pb, float d){
     ubyte_t buf[5];
     union {
         float f; uint32_t i;
@@ -195,7 +226,7 @@ void PackFloat(PackBuffer *pb, float d){
     PackAppendBuffer(pb, buf, 5);
 }
 
-void PackDouble(PackBuffer *pb, double d){
+static void PackDouble(PackBuffer *pb, double d){
     ubyte_t buf[9];
     union{
         double f; uint64_t i;
@@ -213,7 +244,7 @@ void PackDouble(PackBuffer *pb, double d){
     PackAppendBuffer(pb, buf, 9);
 }
 
-void PackArray(PackBuffer *pb, size_t n){
+static void PackArray(PackBuffer *pb, size_t n){
     if(n < 16){
         ubyte_t d = 0x90 | (ubyte_t)n;
         PackAppendBuffer(pb, &TAKE8_8(d), 1);
@@ -234,7 +265,7 @@ void PackArray(PackBuffer *pb, size_t n){
     }
 }
 
-void PackMap(PackBuffer *pb, size_t n){
+static void PackMap(PackBuffer *pb, size_t n){
     if(n < 16){
         ubyte_t d = 0x80 | (ubyte_t)n;
         PackAppendBuffer(pb, &TAKE8_8(d), 1);
@@ -255,7 +286,7 @@ void PackMap(PackBuffer *pb, size_t n){
     }
 }
 
-void PackBin(PackBuffer *pb, size_t len){
+static void PackBin(PackBuffer *pb, size_t len){
     if(len < 256){
         ubyte_t buf[2];
         buf[0] = 0xc4;
@@ -278,11 +309,11 @@ void PackBin(PackBuffer *pb, size_t len){
     }
 }
 
-void PackBinBody(PackBuffer *pb, const void *body, size_t len){
+static void PackBinBody(PackBuffer *pb, const void *body, size_t len){
     PackAppendBuffer(pb, (const ubyte_t *) body, len);
 }
 
-void PackExt(PackBuffer *pb, size_t len, int8_t type){/*{{{*/
+static void PackExt(PackBuffer *pb, size_t len, int8_t type){/*{{{*/
     switch(len){
         case 1:{
             ubyte_t buf[2];
@@ -342,12 +373,12 @@ void PackExt(PackBuffer *pb, size_t len, int8_t type){/*{{{*/
     }
 }/*}}}*/
 
-void PackExtBody(PackBuffer *pb, const void *body, size_t len){
+static void PackExtBody(PackBuffer *pb, const void *body, size_t len){
     PackAppendBuffer(pb, (const ubyte_t *)body, len);
 }
 
 
-void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
+static void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
     if(obj->isKey == TRUE){
         switch(obj->key_type){
             case OBJ_TYPE_STR:
@@ -499,6 +530,83 @@ void PackMessage(PackBuffer *pb, Object *obj){/*{{{*/
         
 }/*}}}*/
 
+static void printBlank(int n){
+    int i = 0;
+    for(i = 0; i < n; i++){
+        printf(" ");
+    }
+}
+
+static Object * HitNode(Object *obj, Object_Type keyType, Object_Value keyValue){/*{{{*/
+    if(obj->isKey == TRUE){
+        switch(keyType){
+            case OBJ_TYPE_STR:
+                printf("\"%s\" : \"%s\"\n", keyValue.str_val, obj->key.str_val);
+                if(strncmp(obj->key.str_val, keyValue.str_val, obj->key_len) == 0)
+                    return obj;
+                break;
+            case OBJ_TYPE_INT8:
+                printf("(int8): %d : %d\n", keyValue.int8_val, obj->key.int8_val);
+                if(keyValue.int8_val == obj->key.int8_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_INT16:
+                printf("(int16): %d : %d\n", keyValue.int16_val, obj->key.int16_val);
+                if(keyValue.int16_val == obj->key.int16_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_INT32:
+                printf("(int32): %d : %d\n", keyValue.int32_val, obj->key.int32_val);
+                if(keyValue.int16_val == obj->key.int16_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_INT64:
+                printf("(int64): %ld : %ld\n", keyValue.int64_val, obj->key.int64_val);
+                if(keyValue.int64_val == obj->key.int64_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_UINT8:
+                printf("(uint8): %u : %u\n", keyValue.uint8_val, obj->key.uint8_val);
+                if(keyValue.uint8_val == obj->key.uint8_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_UINT16:
+                printf("(uint16): %u : %u\n", keyValue.uint16_val, obj->key.uint16_val);
+                if(keyValue.uint16_val == obj->key.uint16_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_UINT32:
+                printf("(uint32): %u : %u\n", keyValue.uint32_val, obj->key.uint32_val);
+                if(keyValue.uint32_val == obj->key.uint32_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_UINT64:
+                printf("(uint64): %lu : %lu\n", keyValue.uint64_val, obj->key.uint64_val);
+                if(keyValue.uint64_val == obj->key.uint64_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_POSITIVE_INT:
+                printf("(fixInt): %u : %u\n", keyValue.uint8_val, obj->key.uint8_val);
+                if(keyValue.uint8_val == obj->key.uint8_val)
+                    return obj;
+                break;
+            case OBJ_TYPE_NEGATIVE_INT:
+                printf("(fixInt): %d : %d\n", keyValue.int8_val, obj->key.int8_val);
+                if(keyValue.int8_val == obj->key.int8_val)
+                    return obj;
+                break;
+            default:
+                printf("not found");
+                return NULL;
+        }
+    }
+
+    if(obj->next != NULL)
+       return HitNode(obj->next, keyType, keyValue); 
+
+    return NULL;
+}/*}}}*/
+
 PackBuffer *MessagePacker(Object *obj){
         /* creates buffer and serializer instance. */
         PackBuffer *pb = NewPackBuffer(); 
@@ -506,13 +614,6 @@ PackBuffer *MessagePacker(Object *obj){
 
         return pb;
 } 
-
-void printBlank(int n){
-    int i = 0;
-    for(i = 0; i < n; i++){
-        printf(" ");
-    }
-}
 
 void printTree(Object *obj, int space){/*{{{*/
     printBlank(space);
@@ -773,76 +874,6 @@ void printJSON(Object *obj){/*{{{*/
 }/*}}}*/
 
 
-Object * HitNode(Object *obj, Object_Type keyType, Object_Value keyValue){/*{{{*/
-    if(obj->isKey == TRUE){
-        switch(keyType){
-            case OBJ_TYPE_STR:
-                printf("\"%s\" : \"%s\"\n", keyValue.str_val, obj->key.str_val);
-                if(strncmp(obj->key.str_val, keyValue.str_val, obj->key_len) == 0)
-                    return obj;
-                break;
-            case OBJ_TYPE_INT8:
-                printf("(int8): %d : %d\n", keyValue.int8_val, obj->key.int8_val);
-                if(keyValue.int8_val == obj->key.int8_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_INT16:
-                printf("(int16): %d : %d\n", keyValue.int16_val, obj->key.int16_val);
-                if(keyValue.int16_val == obj->key.int16_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_INT32:
-                printf("(int32): %d : %d\n", keyValue.int32_val, obj->key.int32_val);
-                if(keyValue.int16_val == obj->key.int16_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_INT64:
-                printf("(int64): %ld : %ld\n", keyValue.int64_val, obj->key.int64_val);
-                if(keyValue.int64_val == obj->key.int64_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_UINT8:
-                printf("(uint8): %u : %u\n", keyValue.uint8_val, obj->key.uint8_val);
-                if(keyValue.uint8_val == obj->key.uint8_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_UINT16:
-                printf("(uint16): %u : %u\n", keyValue.uint16_val, obj->key.uint16_val);
-                if(keyValue.uint16_val == obj->key.uint16_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_UINT32:
-                printf("(uint32): %u : %u\n", keyValue.uint32_val, obj->key.uint32_val);
-                if(keyValue.uint32_val == obj->key.uint32_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_UINT64:
-                printf("(uint64): %lu : %lu\n", keyValue.uint64_val, obj->key.uint64_val);
-                if(keyValue.uint64_val == obj->key.uint64_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_POSITIVE_INT:
-                printf("(fixInt): %u : %u\n", keyValue.uint8_val, obj->key.uint8_val);
-                if(keyValue.uint8_val == obj->key.uint8_val)
-                    return obj;
-                break;
-            case OBJ_TYPE_NEGATIVE_INT:
-                printf("(fixInt): %d : %d\n", keyValue.int8_val, obj->key.int8_val);
-                if(keyValue.int8_val == obj->key.int8_val)
-                    return obj;
-                break;
-            default:
-                printf("not found");
-                return NULL;
-        }
-    }
-
-    if(obj->next != NULL)
-       return HitNode(obj->next, keyType, keyValue); 
-
-    return NULL;
-}/*}}}*/
-
 Object * FindNode(Object *root , int argc, ...){
     va_list ap;
     int i;
@@ -867,31 +898,3 @@ void print(const ubyte_t *buf, unsigned int len){
        printf("0x%02x ", 0xff & buf[i]);
     printf("\n");
 }
-
-//int main(){
-//    ubyte_t str[] = {0xD9, 0x23, 0x61, 0x62, 0x63, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73,  0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73};
-//    ubyte_t array[] = {0x93, 0x01, 0x02, 0x03};
-//    ubyte_t float_val[] = {0xCA, 0x43, 0x5C, 0x00, 0x00};
-//    ubyte_t map[] = {0x82, 0x02, 0xA5, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x03, 0xA5, 0x77, 0x6F, 0x72, 0x6C, 0x64};
-//    
-//    //char *ret_str = parseString(str, &off);
-//    //printf("%s\n", ret_str);
-//    Context *ctx = (Context *)calloc(1, sizeof(Context));
-//    ctx->root = NewObject(); 
-//    ctx->node = ctx->root;
-//    //ctx->buf = array;
-//    //ctx->buf = float_val;
-//    //ctx->buf = ext;
-//    ctx->buf = map;
-//    printf("==============original===================\n");
-//    print((const ubyte_t*)map, (unsigned int )15);
-//    printf("==============building===================\n");
-//    ParseDispatcher(ctx);
-//    printf("==============visit======================\n");
-//    PackBuffer *pb = MessagePacker(ctx->root);
-//    printf("==============result======================\n");
-//    print(pb->buffer, pb->off);
-//
-//    //ctx->buf = float_val;
-//
-//}

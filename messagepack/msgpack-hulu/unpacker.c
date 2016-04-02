@@ -8,7 +8,20 @@
 
 #define STR_LEN 100
 
-Object * NewObject(){
+//declare
+static void ParseEXT(Context *ctx);
+static void ParseMap(Context *ctx);
+static void ParseArray(Context *ctx);
+static void ParseBin(Context *ctx);
+static void ParseString(Context *ctx);
+static void ParseBool(Context *ctx);
+static void ParseNil(Context *ctx);
+static void ParseInteger(Context *ctx);
+static void ParseFloat(Context *ctx);
+static void ParseDispatcher(Context *ctx);
+
+//define
+static Object * NewObject(){
     Object *new_node = (Object *)calloc(1, sizeof(Object));
     if(NULL == new_node){
         perror("NewObject:");
@@ -18,7 +31,7 @@ Object * NewObject(){
     return new_node;
 }
 
-void ParseEXT(Context *ctx){/*{{{*/
+static void ParseEXT(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
@@ -234,7 +247,7 @@ void ParseEXT(Context *ctx){/*{{{*/
    
 }/*}}}*/
 
-void ParseMap(Context *ctx){/*{{{*/
+static void ParseMap(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
@@ -312,7 +325,7 @@ void ParseMap(Context *ctx){/*{{{*/
     printf("0x%x unimplement\n", head);
 }/*}}}*/
 
-void ParseArray(Context *ctx){/*{{{*/
+static void ParseArray(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
@@ -373,7 +386,7 @@ void ParseArray(Context *ctx){/*{{{*/
     printf("0x%x unimplement\n", head);
 }/*}}}*/
 
-void ParseBin(Context *ctx){/*{{{*/
+static void ParseBin(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
@@ -411,7 +424,7 @@ void ParseBin(Context *ctx){/*{{{*/
     }
 }/*}}}*/
 
-void ParseString(Context *ctx){/*{{{*/
+static void ParseString(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
@@ -485,7 +498,7 @@ void ParseString(Context *ctx){/*{{{*/
     }
 }/*}}}*/
 
-void ParseBool(Context *ctx){/*{{{*/
+static void ParseBool(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index;
@@ -498,7 +511,7 @@ void ParseBool(Context *ctx){/*{{{*/
         printf("0x%x unimplement\n", head);
 }/*}}}*/
 
-void ParseNil(Context *ctx){/*{{{*/
+static void ParseNil(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index;
@@ -512,7 +525,7 @@ void ParseNil(Context *ctx){/*{{{*/
 
 }/*}}}*/
 
-void ParseInteger(Context *ctx){/*{{{*/
+static void ParseInteger(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index & 0xFF;
@@ -663,7 +676,7 @@ void ParseInteger(Context *ctx){/*{{{*/
     }
 }/*}}}*/
 
-void ParseFloat(Context *ctx){/*{{{*/
+static void ParseFloat(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
     ubyte_t head = *index;
@@ -695,7 +708,7 @@ void ParseFloat(Context *ctx){/*{{{*/
         printf("0x%x unimplement\n", head);
 }/*}}}*/
 
-void  ParseDispatcher(Context *ctx){/*{{{*/
+static void ParseDispatcher(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     ubyte_t head = *index;
     if ( (head & 0x80) == 0){
@@ -924,26 +937,3 @@ Object * MessageUnpacker(ubyte_t *buf, int len){
 
     return ctx->root;
 }
-
-//int main(){
-//    ubyte_t ext[] = {0xC7, 0x11, 0x00, 0xA4, 0x6E, 0x61, 0x6D, 0x65, 0xA6, 0xE5, 0x91, 0xB5, 0xE5, 0x91, 0xB5, 0xA3, 0x61, 0x67, 0x65, 0x0A};
-//    ubyte_t str[] = {0xD9, 0x29, 0x61, 0x62, 0x63, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73,  0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73};
-//    ubyte_t array[] = {0x93, 0x01, 0x02, 0x03};
-//    ubyte_t float_val[] = {0xCA, 0x43, 0x5C, 0x00, 0x00};
-//    ubyte_t map[] = {0x82, 0x02, 0xA5, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x03, 0xA5, 0x77, 0x6F, 0x72, 0x6C, 0x64};
-//    
-//    //char *ret_str = parseString(str, &off);
-//    //printf("%s\n", ret_str);
-//    Context *ctx = (Context *)calloc(1, sizeof(Context));
-//    ctx->root = NewObject(); 
-//    ctx->node = ctx->root;
-//    //ctx->buf = array;
-//    //ctx->buf = float_val;
-//    //ctx->buf = ext;
-//    ctx->buf = ext;
-//    ParseDispatcher(ctx);
-//
-//    //ctx->buf = float_val;
-//    //printf("%f\n", ParseFloat(ctx));
-//}
-

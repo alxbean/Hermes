@@ -1,5 +1,5 @@
 /*************************************************************************
-    > File Name: parse_msg.h
+    > File Name: packer.h
     > Author: shuaixiang
     > Mail: shuaixiang@yuewen.com
     > Created Time: Fri 11 Mar 2016 03:22:39 AM UTC
@@ -7,8 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include "unpacker.h"
-#include "../unpacker.c"
+#include "hulu_define.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +20,10 @@ extern "C" {
     
 //Interfce
 PackBuffer* MessagePacker(Object *obj);
+Object * FindNode(Object *root , int argc, ...);
+void print(const ubyte_t *buf, unsigned int len);
+void printJSON(Object *obj);
+void printTree(Object *obj, int space);
 
 #ifdef __cplusplus
 }
