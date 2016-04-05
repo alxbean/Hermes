@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdarg.h>
-#include "packTree.c"
+#include "include/packTree.h"
 
 int main(){
 //----------------------packTree----------------------
@@ -18,7 +18,6 @@ char a[100] = "helloworld";
 PackNode_String(ctx, a, strlen(a)); 
 
 PackNode_Int(ctx, 1); 
-
 
 PackNode_ArrayBegin(ctx);
 PackNode_Int(ctx, 2);

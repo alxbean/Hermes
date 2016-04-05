@@ -46,6 +46,7 @@ void PackNode_String(TreeCTX *ctx, string_t str, size_t len){
         return;
     }
     obj->obj_type = OBJ_TYPE_STR; 
+    obj->value.str_val = (string_t) malloc(sizeof(char)*len);
     memcpy(obj->value.str_val, str, len);
 
     if(TRUE == ctx->isChild){
@@ -384,6 +385,7 @@ void PackNode_Bin(TreeCTX *ctx, ubyte_t * b, size_t len){
         return;
     }
     obj->obj_type = OBJ_TYPE_BIN;
+    obj->value.bin_val = (ubyte_t *) malloc(sizeof(ubyte_t)*len);
     memcpy(obj->value.bin_val, b, len);
 
     if(TRUE == ctx->isChild){
@@ -401,6 +403,7 @@ void PackNode_ArrayBegin(TreeCTX *ctx){
         return;
     }
 
+    obj->obj_type = OBJ_TYPE_ARRAY;
     ctx->node->next = obj;
     ctx->node = obj;
     ctx->isChild = TRUE;
@@ -417,6 +420,7 @@ void PackNode_MapBegin(TreeCTX *ctx){
         return;
     }
 
+    obj->obj_type = OBJ_TYPE_MAP;
     ctx->node->next = obj;
     ctx->node = obj;
     ctx->isChild = TRUE;
