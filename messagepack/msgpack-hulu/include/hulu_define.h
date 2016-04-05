@@ -46,7 +46,7 @@ extern "C" {
         OBJ_TYPE_EXT = 0x11,
         OBJ_TYPE_POSITIVE_INT = 0x12,
         OBJ_TYPE_NEGATIVE_INT = 0x13
-    }Object_Type; 
+    } Object_Type; 
 
     typedef union Object_Value{
         string_t str_val;
@@ -76,8 +76,7 @@ extern "C" {
         Object_Value key;
     } Object;
 
-    
-
+    Object * NewObject();
 #ifdef __cplusplus
 }
 #endif

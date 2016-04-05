@@ -22,30 +22,6 @@
 //declare
 static PackBuffer* NewPackBuffer();
 static int PackAppendBuffer(PackBuffer *pb, const ubyte_t *buf, size_t len);
-static void PackString(PackBuffer *pb, size_t len);
-static void PackStringBody(PackBuffer *pb, const void* body, size_t len);
-static void PackFixNumPositive(PackBuffer *pb, uint8_t d);
-static void PackFixNumNegative(PackBuffer *pb, int8_t d);
-static void PackFixInt8_u(PackBuffer *pb, uint8_t d);
-static void PackFixInt16_u(PackBuffer *pb, uint16_t d);
-static void PackFixInt32_u(PackBuffer *pb, uint32_t d);
-static void PackFixInt64_u(PackBuffer *pb, uint64_t d);
-static void PackFixInt8(PackBuffer *pb, int8_t d);
-static void PackFixInt16(PackBuffer *pb, int16_t d);
-static void PackFixInt16(PackBuffer *pb, int16_t d);
-static void PackFixInt32(PackBuffer *pb, int32_t d);
-static void PackFixInt64(PackBuffer *pb, int64_t d);
-static void PackNil(PackBuffer *pb);
-static void PackTrue(PackBuffer *pb);
-static void PackFalse(PackBuffer *pb);
-static void PackFloat(PackBuffer *pb, float d);
-static void PackDouble(PackBuffer *pb, double d);
-static void PackArray(PackBuffer *pb, size_t n);
-static void PackMap(PackBuffer *pb, size_t n);
-static void PackBin(PackBuffer *pb, size_t len);
-static void PackBinBody(PackBuffer *pb, const void *body, size_t len);
-static void PackExt(PackBuffer *pb, size_t len, int8_t type);
-static void PackExtBody(PackBuffer *pb, const void *body, size_t len);
 static void PackMessage(PackBuffer *pb, Object *obj);
 static void printBlank(int n);
 static Object * HitNode(Object *obj, Object_Type keyType, Object_Value keyValue);
@@ -86,7 +62,7 @@ static int PackAppendBuffer(PackBuffer *pb, const ubyte_t *buf, size_t len){
     return 0;
 }
 
-static void PackString(PackBuffer *pb, size_t len){
+void PackString(PackBuffer *pb, size_t len){
    if(len < 32){
        ubyte_t head = 0xa0 | (ubyte_t)len; 
        PackAppendBuffer(pb, &TAKE8_8(head), 1); 
@@ -111,24 +87,24 @@ static void PackString(PackBuffer *pb, size_t len){
    }
 }
 
-static void PackStringBody(PackBuffer *pb, const void* body, size_t len){
+void PackStringBody(PackBuffer *pb, const void* body, size_t len){
     PackAppendBuffer(pb, (const ubyte_t*)body, len);
 }
 
-static void PackFixNumPositive(PackBuffer *pb, uint8_t d){
+void PackFixNumPositive(PackBuffer *pb, uint8_t d){
     PackAppendBuffer(pb, &TAKE8_8(d), 1);
 }
 
-static void PackFixNumNegative(PackBuffer *pb, int8_t d){
+void PackFixNumNegative(PackBuffer *pb, int8_t d){
     PackAppendBuffer(pb, &TAKE8_8(d), 1);
 }
 
-static void PackFixInt8_u(PackBuffer *pb, uint8_t d){
+void PackFixInt8_u(PackBuffer *pb, uint8_t d){
     ubyte_t buf[2] = {0xcc, TAKE8_8(d)};
     PackAppendBuffer(pb, buf, 2);
 }
 
-static void PackFixInt16_u(PackBuffer *pb, uint16_t d){
+void PackFixInt16_u(PackBuffer *pb, uint16_t d){
     ubyte_t buf[3];
     buf[0] = 0xcd;
     buf[1] = ((ubyte_t *)&d)[1];
@@ -136,7 +112,7 @@ static void PackFixInt16_u(PackBuffer *pb, uint16_t d){
     PackAppendBuffer(pb, buf, 3);
 }
 
-static void PackFixInt32_u(PackBuffer *pb, uint32_t d){
+void PackFixInt32_u(PackBuffer *pb, uint32_t d){
     ubyte_t buf[5];
     buf[0] = 0xce;
     buf[1] = ((ubyte_t *)&d)[3];
@@ -146,7 +122,7 @@ static void PackFixInt32_u(PackBuffer *pb, uint32_t d){
     PackAppendBuffer(pb, buf, 5);
 }
 
-static void PackFixInt64_u(PackBuffer *pb, uint64_t d){
+void PackFixInt64_u(PackBuffer *pb, uint64_t d){
     ubyte_t buf[9];
     buf[0] = 0xce;
     buf[1] = ((ubyte_t *)&d)[7];
@@ -160,12 +136,12 @@ static void PackFixInt64_u(PackBuffer *pb, uint64_t d){
     PackAppendBuffer(pb, buf, 9);
 }
 
-static void PackFixInt8(PackBuffer *pb, int8_t d){
+void PackFixInt8(PackBuffer *pb, int8_t d){
     ubyte_t buf[2] = {0xd0, TAKE8_8(d)};
     PackAppendBuffer(pb, buf, 2);
 }
 
-static void PackFixInt16(PackBuffer *pb, int16_t d){
+void PackFixInt16(PackBuffer *pb, int16_t d){
     ubyte_t buf[3];
     buf[0] = 0xd1;
     buf[1] = ((ubyte_t *)&d)[1];
@@ -173,7 +149,7 @@ static void PackFixInt16(PackBuffer *pb, int16_t d){
     PackAppendBuffer(pb, buf, 3);
 }
 
-static void PackFixInt32(PackBuffer *pb, int32_t d){
+void PackFixInt32(PackBuffer *pb, int32_t d){
     ubyte_t buf[5];
     buf[0] = 0xd2;
     buf[1] = ((ubyte_t *)&d)[3];
@@ -183,7 +159,7 @@ static void PackFixInt32(PackBuffer *pb, int32_t d){
     PackAppendBuffer(pb, buf, 5);
 }
 
-static void PackFixInt64(PackBuffer *pb, int64_t d){
+void PackFixInt64(PackBuffer *pb, int64_t d){
     ubyte_t buf[9];
     buf[0] = 0xd3;
     buf[1] = ((ubyte_t *)&d)[7];
@@ -197,22 +173,22 @@ static void PackFixInt64(PackBuffer *pb, int64_t d){
     PackAppendBuffer(pb, buf, 9);
 }
 
-static void PackNil(PackBuffer *pb){
+void PackNil(PackBuffer *pb){
     static const ubyte_t d = 0xc0;
     PackAppendBuffer(pb, &d, 1);
 }
 
-static void PackTrue(PackBuffer *pb){
+void PackTrue(PackBuffer *pb){
     static const ubyte_t d = 0xc3;
     PackAppendBuffer(pb, &d, 1);
 }
 
-static void PackFalse(PackBuffer *pb){
+void PackFalse(PackBuffer *pb){
     static const ubyte_t d = 0xc2;
     PackAppendBuffer(pb, &d, 1);
 }
 
-static void PackFloat(PackBuffer *pb, float d){
+void PackFloat(PackBuffer *pb, float d){
     ubyte_t buf[5];
     union {
         float f; uint32_t i;
@@ -226,7 +202,7 @@ static void PackFloat(PackBuffer *pb, float d){
     PackAppendBuffer(pb, buf, 5);
 }
 
-static void PackDouble(PackBuffer *pb, double d){
+void PackDouble(PackBuffer *pb, double d){
     ubyte_t buf[9];
     union{
         double f; uint64_t i;
@@ -244,7 +220,7 @@ static void PackDouble(PackBuffer *pb, double d){
     PackAppendBuffer(pb, buf, 9);
 }
 
-static void PackArray(PackBuffer *pb, size_t n){
+void PackArray(PackBuffer *pb, size_t n){
     if(n < 16){
         ubyte_t d = 0x90 | (ubyte_t)n;
         PackAppendBuffer(pb, &TAKE8_8(d), 1);
@@ -265,7 +241,7 @@ static void PackArray(PackBuffer *pb, size_t n){
     }
 }
 
-static void PackMap(PackBuffer *pb, size_t n){
+void PackMap(PackBuffer *pb, size_t n){
     if(n < 16){
         ubyte_t d = 0x80 | (ubyte_t)n;
         PackAppendBuffer(pb, &TAKE8_8(d), 1);
@@ -286,7 +262,7 @@ static void PackMap(PackBuffer *pb, size_t n){
     }
 }
 
-static void PackBin(PackBuffer *pb, size_t len){
+void PackBin(PackBuffer *pb, size_t len){
     if(len < 256){
         ubyte_t buf[2];
         buf[0] = 0xc4;
@@ -309,11 +285,11 @@ static void PackBin(PackBuffer *pb, size_t len){
     }
 }
 
-static void PackBinBody(PackBuffer *pb, const void *body, size_t len){
+void PackBinBody(PackBuffer *pb, const void *body, size_t len){
     PackAppendBuffer(pb, (const ubyte_t *) body, len);
 }
 
-static void PackExt(PackBuffer *pb, size_t len, int8_t type){/*{{{*/
+void PackExt(PackBuffer *pb, size_t len, int8_t type){/*{{{*/
     switch(len){
         case 1:{
             ubyte_t buf[2];
@@ -373,7 +349,7 @@ static void PackExt(PackBuffer *pb, size_t len, int8_t type){/*{{{*/
     }
 }/*}}}*/
 
-static void PackExtBody(PackBuffer *pb, const void *body, size_t len){
+void PackExtBody(PackBuffer *pb, const void *body, size_t len){
     PackAppendBuffer(pb, (const ubyte_t *)body, len);
 }
 

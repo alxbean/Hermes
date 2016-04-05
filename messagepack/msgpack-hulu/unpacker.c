@@ -1,5 +1,5 @@
 /*************************************************************************
-    > File Name: parse.c
+    > File Name: unparker.c
     > Author: shuaixiang
     > Mail: shuaixiang@yuewen.com
     > Created Time: Fri 11 Mar 2016 03:24:11 AM UTC
@@ -21,16 +21,6 @@ static void ParseFloat(Context *ctx);
 static void ParseDispatcher(Context *ctx);
 
 //define
-static Object * NewObject(){
-    Object *new_node = (Object *)calloc(1, sizeof(Object));
-    if(NULL == new_node){
-        perror("NewObject:");
-        return NULL;
-    }
-    new_node->isKey = FALSE;
-    return new_node;
-}
-
 static void ParseEXT(Context *ctx){/*{{{*/
     ubyte_t *index = ctx->buf + ctx->off;
     int *off = &ctx->off;
