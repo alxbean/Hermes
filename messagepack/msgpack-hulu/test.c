@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "include/packTree.h"
+#include "include/unpacker.h"
 
 int main(){
 //----------------------packTree----------------------
@@ -34,6 +35,14 @@ PackTree_MapEnd(ctx);
 
 char b[100] = "end";
 PackTree_String(ctx, b, strlen(b)); 
+
+printf("\n================TREE==================\n");
+printTree(ctx->root, 0);
+printf("\n================JSON==================\n");
+printJSON(ctx->root);
+printf("\n================BUILD==================\n");
+PackBuffer *pb = MessagePacker(ctx->root);
+print(pb->buffer, pb->off);
 
 //----------------------packer------------------------    /*{{{*/
 //    ubyte_t str[] = {0xD9, 0x23, 0x61, 0x62, 0x63, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x6D, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73,  0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73, 0x73};

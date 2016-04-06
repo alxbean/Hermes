@@ -5,7 +5,15 @@
     > Created Time: Tue 05 Apr 2016 06:21:32 AM UTC
  ************************************************************************/
 
+#ifndef _PACKER_H_
+#define _PACKER_H_
 #include "packer.h"
+#endif
+
+#ifndef _HULU_DEFINE_H_
+#define _HULU_DEFINE_H_
+#include "hulu_define.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {

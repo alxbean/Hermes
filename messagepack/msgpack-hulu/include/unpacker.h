@@ -7,7 +7,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifndef _HULU_DEFINE_H_
+#define _HULU_DEFINE_H_
 #include "hulu_define.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
