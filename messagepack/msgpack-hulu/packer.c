@@ -84,6 +84,7 @@ void PackString(PackBuffer *pb, size_t len){
        buf[2] = ((ubyte_t *)&len)[2];
        buf[3] = ((ubyte_t *)&len)[1];
        buf[4] = ((ubyte_t *)&len)[0];
+       PackAppendBuffer(pb, buf, 5); 
    }
 }
 
