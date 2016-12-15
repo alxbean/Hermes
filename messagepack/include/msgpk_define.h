@@ -1,22 +1,26 @@
 /*************************************************************************
-    > File Name: msghulu_define.h
-    > Author: shuaixiang
-    > Mail: shuaixiang@yuewen.com
-    > Created Time: Mon 07 Mar 2016 08:05:25 AM UTC
- ************************************************************************/
-#include <stdint.h>
-#include <stdio.h>
+> File Name: msgpk_define.h
+> Author: shuaixiang
+> Mail: shuaixiang@yuewen.com
+> Created Time: Mon 07 Mar 2016 08:05:25 AM UTC
+************************************************************************/
+#ifndef _MSGPK_DEFINE_H_
+#define _MSGPK_DEFINE_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-    typedef unsigned char ubyte_t ;
-    typedef unsigned char byte_t ;
-    typedef char *string_t;
-    typedef enum{
-        TRUE = 1,
-        FALSE = 0
-    }bool_t;
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "spx_types.h"
+    //typedef unsigned char ubyte_t ;
+    //typedef unsigned char byte_t ;
+    //typedef char *string_t;
+    //typedef enum{
+    //    true = 1,
+    //    false = 0
+    //}bool_t;
 
     //static union{
     //    char a[4];
@@ -24,7 +28,7 @@ extern "C" {
     //}endian={{'L','?', '?', 'B'}};
 
     //#define ENDIAN ((char)endian.ul)
-    
+
     typedef enum{
         OBJ_TYPE_STR = 0x00,
         OBJ_TYPE_BIN = 0x01,
@@ -46,10 +50,10 @@ extern "C" {
         OBJ_TYPE_EXT = 0x11,
         OBJ_TYPE_POSITIVE_INT = 0x12,
         OBJ_TYPE_NEGATIVE_INT = 0x13
-    } Object_Type; 
+    } object_type; 
 
-    typedef union Object_Value{
-        string_t str_val;
+    typedef union object_value{
+        char *str_val;
         ubyte_t *bin_val;
         int8_t int8_val;
         uint8_t uint8_val;
@@ -62,21 +66,35 @@ extern "C" {
         float float_val;
         double double_val;
         bool_t bool_val;
-    } Object_Value;
+    } object_value;
 
-    typedef struct Object{
+    struct msgpk_object{
         bool_t isKey;
-        Object_Type key_type;
-        Object_Type obj_type;
-        struct Object *next;
-        struct Object *child;
-        Object_Value value;
+        object_type key_type;
+        object_type obj_type;
+        struct msgpk_object *next;
+        struct msgpk_object *child;
+        object_value value;
         int obj_len;
         int key_len;
-        Object_Value key;
-    } Object;
+        object_value key;
+    };
 
-    Object * NewObject();
+    static inline struct msgpk_object * new_msgpk_object(){
+        struct msgpk_object *new_node = (struct msgpk_object *) calloc(1, sizeof(struct msgpk_object));
+        if(NULL == new_node){
+            perror("new msgpk_object:");
+            return NULL;
+        }
+    
+        new_node->isKey = false;
+        new_node->key_type = OBJ_TYPE_NIL;
+        new_node->obj_type = OBJ_TYPE_NIL; 
+
+        return new_node;
+    }
+
 #ifdef __cplusplus
 }
+#endif
 #endif
