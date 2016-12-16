@@ -1489,6 +1489,7 @@ static int bfs_queue_push(struct msgpk_object* obj){/*{{{*/
 
     struct bfs_queue_node* new_node = (struct bfs_queue_node*) malloc(sizeof(*new_node));
     new_node->obj = obj;
+    new_node->next_node = NULL;
 
     if (NULL == bq.tail){
         bq.head = new_node;
