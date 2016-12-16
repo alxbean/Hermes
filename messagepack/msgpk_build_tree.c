@@ -39,6 +39,8 @@ static struct msgpk_object * msgpk_build_node_bin(ubyte_t * b, size_t len, struc
 
 static struct msgpk_object * msgpk_tree_hit_node(struct msgpk_object *obj, object_type keyType, object_value keyValue);
 static void msgpk_tree_print_blank(int n);
+static int bfs_queue_push(struct msgpk_object* obj);
+static struct msgpk_object* bfs_queue_pop();
 
 static struct msgpk_object * msgpk_tree_hit_node(struct msgpk_object *obj, object_type keyType, object_value keyValue){/*{{{*/
     if(obj->isKey == true){
@@ -1440,8 +1442,8 @@ void msgpk_tree_print_json(struct msgpk_object *obj){/*{{{*/
         
 }/*}}}*/
 
-//free tree
-void msgpk_tree_free(struct msgpk_object *obj){/*{{{*/
+//free tree dfs
+void msgpk_tree_free_dfs(struct msgpk_object *obj){/*{{{*/
     if (NULL == obj){
         printf("tree free failed, obj is NULL\n");
         return;
@@ -1466,5 +1468,79 @@ void msgpk_tree_free(struct msgpk_object *obj){/*{{{*/
         msgpk_tree_free(obj->next);
 
     free(obj);
+}/*}}}*/
+
+//free tree bfs
+struct bfs_queue_node{
+    struct msgpk_object* obj;
+    struct bfs_queue_node* next_node;
+};
+
+struct bfs_queue{
+    struct bfs_queue_node* head;
+    struct bfs_queue_node* tail;
+} bq;
+
+static int bfs_queue_push(struct msgpk_object* obj){/*{{{*/
+    if (NULL == obj){
+        perror("obj:");
+        return -1;
+    }
+
+    struct bfs_queue_node* new_node = (struct bfs_queue_node*) malloc(sizeof(*new_node));
+    new_node->obj = obj;
+
+    if (NULL == bq.tail){
+        bq.head = new_node;
+        bq.tail = new_node;
+    } else {
+        bq.tail->next_node = new_node;
+        bq.tail = new_node;
+    }
+
+    return 0;
+}/*}}}*/
+
+static struct msgpk_object* bfs_queue_pop(){/*{{{*/
+    if (NULL == bq.head){
+        printf("queue is empty\n");
+        return NULL;
+    } else {
+        struct bfs_queue_node* node = bq.head;
+        bq.head = bq.head->next_node;
+        if (NULL == bq.head)
+            bq.tail = NULL;
+        return node->obj;
+    }
+}/*}}}*/
+
+void msgpk_tree_free(struct msgpk_object* obj){/*{{{*/
+    if (NULL == obj){
+        perror("obj is NULL");
+        return;
+    }
+
+    bfs_queue_push(obj);
+
+    while (bq.head != NULL){
+        struct msgpk_object* obj = bfs_queue_pop();
+        if (obj->child != NULL)
+            bfs_queue_push(obj->child);
+        if (obj->next != NULL)
+            bfs_queue_push(obj->next);
+
+        if (obj->isKey == true){
+            if (OBJ_TYPE_STR == obj->key_type)
+                free(obj->key.str_val);
+            if (OBJ_TYPE_BIN == obj->key_type)
+                free(obj->key.bin_val);
+        }
+                                                      
+        if (OBJ_TYPE_STR == obj->obj_type)
+            free(obj->value.str_val);
+        if (OBJ_TYPE_BIN == obj->obj_type)
+            free(obj->value.bin_val);
+        free(obj);
+    }
 }/*}}}*/
 
