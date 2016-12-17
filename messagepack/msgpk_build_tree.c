@@ -1507,11 +1507,12 @@ static int bfs_queue_push(struct msgpk_object* obj){/*{{{*/
 }/*}}}*/
 
 static struct msgpk_object* bfs_queue_pop(){/*{{{*/
+    pthread_mutex_lock(&bq.mutex);
     if (NULL == bq.head){
         printf("queue is empty\n");
+        pthread_mutex_unlock(&bq.mutex);
         return NULL;
     } else {
-        pthread_mutex_lock(&bq.mutex);
         struct bfs_queue_node* node = bq.head;
         bq.head = bq.head->next_node;
         if (NULL == bq.head)
