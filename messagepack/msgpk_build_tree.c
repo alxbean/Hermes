@@ -40,8 +40,21 @@ static struct msgpk_object * msgpk_build_node_bin(ubyte_t * b, size_t len, struc
 
 static struct msgpk_object * msgpk_tree_hit_node(struct msgpk_object *obj, object_type keyType, object_value keyValue);
 static void msgpk_tree_print_blank(int n);
-static int bfs_queue_push(struct msgpk_object* obj);
-static struct msgpk_object* bfs_queue_pop();
+
+struct bfs_queue_node{
+    struct msgpk_object* obj;
+    struct bfs_queue_node* next_node;
+};
+
+struct bfs_queue{
+    struct bfs_queue_node* head;
+    struct bfs_queue_node* tail;
+    pthread_mutex_t mutex;
+};
+static struct bfs_queue* bfs_queue_new();
+static int bfs_queue_push(struct bfs_queue* bq, struct msgpk_object* obj);
+static struct msgpk_object* bfs_queue_pop(struct bfs_queue *bq);
+static int bfs_queue_destroy(struct bfs_queue **pbq);
 
 static struct msgpk_object * msgpk_tree_hit_node(struct msgpk_object *obj, object_type keyType, object_value keyValue){/*{{{*/
     if(obj->isKey == true){
@@ -1472,18 +1485,38 @@ void msgpk_tree_free_dfs(struct msgpk_object *obj){/*{{{*/
 }/*}}}*/
 
 //free tree bfs
-struct bfs_queue_node{
-    struct msgpk_object* obj;
-    struct bfs_queue_node* next_node;
-};
 
-struct bfs_queue{
-    struct bfs_queue_node* head;
-    struct bfs_queue_node* tail;
-    pthread_mutex_t mutex;
-} bq;
+static struct bfs_queue* bfs_queue_new(){
+    struct bfs_queue* bq = (struct bfs_queue*) malloc(sizeof(*bq));
+    bq->head = NULL;
+    bq->tail = NULL;
+    pthread_mutex_init(&bq->mutex, NULL);
 
-static int bfs_queue_push(struct msgpk_object* obj){/*{{{*/
+    return bq;
+}
+
+static int bfs_queue_destroy(struct bfs_queue **pbq){/*{{{*/
+    if (NULL == pbq){
+        perror("bpq:");
+        return -1;
+    }
+
+    struct bfs_queue* bq = *pbq;
+    if (NULL == bq){
+        perror("bq:");
+        return -1;
+    }
+
+    while (bq->head != NULL)
+        bfs_queue_pop(bq);
+
+    free(bq);
+    *pbq = NULL;
+
+    return 0;
+}/*}}}*/
+
+static int bfs_queue_push(struct bfs_queue *bq, struct msgpk_object* obj){/*{{{*/
     if (NULL == obj){
         perror("obj:");
         return -1;
@@ -1493,49 +1526,50 @@ static int bfs_queue_push(struct msgpk_object* obj){/*{{{*/
     new_node->obj = obj;
     new_node->next_node = NULL;
 
-    pthread_mutex_lock(&bq.mutex);
-    if (NULL == bq.tail){
-        bq.head = new_node;
-        bq.tail = new_node;
+    pthread_mutex_lock(&bq->mutex);
+    if (NULL == bq->tail){
+        bq->head = new_node;
+        bq->tail = new_node;
     } else {
-        bq.tail->next_node = new_node;
-        bq.tail = new_node;
+        bq->tail->next_node = new_node;
+        bq->tail = new_node;
     }
-    pthread_mutex_unlock(&bq.mutex);
+    pthread_mutex_unlock(&bq->mutex);
 
     return 0;
 }/*}}}*/
 
-static struct msgpk_object* bfs_queue_pop(){/*{{{*/
-    pthread_mutex_lock(&bq.mutex);
-    if (NULL == bq.head){
+static struct msgpk_object* bfs_queue_pop(struct bfs_queue *bq){/*{{{*/
+    pthread_mutex_lock(&bq->mutex);
+    if (NULL == bq->head){
         printf("queue is empty\n");
-        pthread_mutex_unlock(&bq.mutex);
+        pthread_mutex_unlock(&bq->mutex);
         return NULL;
     } else {
-        struct bfs_queue_node* node = bq.head;
-        bq.head = bq.head->next_node;
-        if (NULL == bq.head)
-            bq.tail = NULL;
-        pthread_mutex_unlock(&bq.mutex);
+        struct bfs_queue_node* node = bq->head;
+        bq->head = bq->head->next_node;
+        if (NULL == bq->head)
+            bq->tail = NULL;
+        pthread_mutex_unlock(&bq->mutex);
         return node->obj;
     }
 }/*}}}*/
 
-void msgpk_tree_free(struct msgpk_object* obj){/*{{{*/
+void msgpk_tree_free(struct msgpk_object* obj){
     if (NULL == obj){
         perror("obj is NULL");
         return;
     }
 
-    bfs_queue_push(obj);
+    struct bfs_queue* bq = bfs_queue_new();
+    bfs_queue_push(bq, obj);
 
-    while (bq.head != NULL){
-        struct msgpk_object* obj = bfs_queue_pop();
+    while (bq->head != NULL){
+        struct msgpk_object* obj = bfs_queue_pop(bq);
         if (obj->child != NULL)
-            bfs_queue_push(obj->child);
+            bfs_queue_push(bq, obj->child);
         if (obj->next != NULL)
-            bfs_queue_push(obj->next);
+            bfs_queue_push(bq, obj->next);
 
         if (obj->isKey == true){
             if (OBJ_TYPE_STR == obj->key_type)
@@ -1550,5 +1584,7 @@ void msgpk_tree_free(struct msgpk_object* obj){/*{{{*/
             free(obj->value.bin_val);
         free(obj);
     }
-}/*}}}*/
+
+    bfs_queue_destroy(&bq);
+}
 
