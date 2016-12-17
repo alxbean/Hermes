@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include "msgpk_build_tree.h"
 #include "spx_string.h"
+#include <pthread.h>
 
 #define MsgpkBuildTreeStackSize 100
 
@@ -1479,6 +1480,7 @@ struct bfs_queue_node{
 struct bfs_queue{
     struct bfs_queue_node* head;
     struct bfs_queue_node* tail;
+    pthread_mutex_t mutex;
 } bq;
 
 static int bfs_queue_push(struct msgpk_object* obj){/*{{{*/
@@ -1498,6 +1500,7 @@ static int bfs_queue_push(struct msgpk_object* obj){/*{{{*/
         bq.tail->next_node = new_node;
         bq.tail = new_node;
     }
+    pthread_mutex_lock(&bq.mutex);
 
     return 0;
 }/*}}}*/
@@ -1507,10 +1510,12 @@ static struct msgpk_object* bfs_queue_pop(){/*{{{*/
         printf("queue is empty\n");
         return NULL;
     } else {
+        pthread_mutex_lock(&bq.mutex);
         struct bfs_queue_node* node = bq.head;
         bq.head = bq.head->next_node;
         if (NULL == bq.head)
             bq.tail = NULL;
+        pthread_mutex_lock(&bq.mutex);
         return node->obj;
     }
 }/*}}}*/
