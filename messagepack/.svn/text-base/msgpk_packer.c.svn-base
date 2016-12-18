@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include "msgpk_packer.h"
-#include "msgpk_common.h"
 
 #define MsgpkPackerInitBufferSize 8192
 
@@ -74,7 +73,7 @@ static int pack_append_buffer(struct pack_buffer *pb, const ubyte_t *buf, size_t
     return 0;
 }/*}}}*/
 
-static void pack_message_dfs(struct pack_buffer *pb, struct msgpk_object *obj){/*{{{*/
+static void pack_message(struct pack_buffer *pb, struct msgpk_object *obj){/*{{{*/
     if(obj->isKey == true){
         switch(obj->key_type){
             case OBJ_TYPE_STR:
@@ -224,167 +223,6 @@ static void pack_message_dfs(struct pack_buffer *pb, struct msgpk_object *obj){/
         pack_message(pb, obj->next);
     }
         
-}/*}}}*/
-
-static void pack_message(struct pack_buffer *pb, struct msgpk_object *obj){/*{{{*/
-
-    struct bfs_queue* bq = bfs_queue_new();
-    bfs_queue_push(bq, obj);
-    while (bq->head != NULL){//is queue empty
-        struct msgpk_object* obj = bfs_queue_pop(bq);
-
-        if(obj->child != NULL){
-            printf("child:\n");
-            bfs_queue_push(bq, obj->child);
-        }
-
-        if(obj->next != NULL){
-            printf("next:\n");
-            bfs_queue_push(bq, obj->next);
-        }
-
-        if(obj->isKey == true){
-            switch(obj->key_type){
-                case OBJ_TYPE_STR:
-                    msgpk_pack_string(pb, obj->key_len);
-                    msgpk_pack_string_body(pb, obj->key.str_val, obj->key_len);
-                    printf("(str_val)\"%s\" -> ", obj->key.str_val);
-                    break;
-                case OBJ_TYPE_INT8:
-                    msgpk_pack_fixInt8(pb, obj->key.int8_val);
-                    printf("(int8)%d -> ", obj->key.int8_val);
-                    break;
-                case OBJ_TYPE_INT16:
-                    msgpk_pack_fixInt16(pb, obj->key.int16_val);
-                    printf("(int16)%d -> ", obj->key.int16_val);
-                    break;
-                case OBJ_TYPE_INT32:
-                    msgpk_pack_fixInt32(pb, obj->key.int32_val);
-                    printf("(int32)%d -> ", obj->key.int32_val);
-                    break;
-                case OBJ_TYPE_INT64:
-                    msgpk_pack_fixInt64(pb, obj->key.int64_val);
-                    printf("(int64)%ld -> ", obj->key.int64_val);
-                    break;
-                case OBJ_TYPE_UINT8:
-                    msgpk_pack_fixInt8_u(pb, obj->key.uint8_val);
-                    printf("(uint8)%u -> ", obj->key.uint8_val);
-                    break;
-                case OBJ_TYPE_UINT16:
-                    msgpk_pack_fixInt16_u(pb, obj->key.uint16_val); 
-                    printf("(uint16)%u -> ", obj->key.uint16_val);
-                    break;
-                case OBJ_TYPE_UINT32:
-                    msgpk_pack_fixInt32_u(pb, obj->key.uint32_val);
-                    printf("(uint32)%u -> ", obj->key.uint32_val);
-                    break;
-                case OBJ_TYPE_UINT64:
-                    msgpk_pack_fixInt64_u(pb, obj->key.uint64_val);
-                    printf("(uint64)%lu -> ", obj->key.uint64_val);
-                    break;
-                case OBJ_TYPE_POSITIVE_INT:
-                    msgpk_pack_fixnum_positive(pb, obj->key.uint8_val);
-                    printf("(fixInt)%u -> ", obj->key.uint8_val);
-                    break;
-                case OBJ_TYPE_NEGATIVE_INT:
-                    msgpk_pack_fixnum_negative(pb, obj->key.int8_val);
-                    printf("(fixInt)%d -> ", obj->key.int8_val);
-                    break;
-                default:
-                    break;
-            }
-        }
-                                                      
-        switch(obj->obj_type){
-            case OBJ_TYPE_STR:
-                msgpk_pack_string(pb, obj->obj_len);
-                msgpk_pack_string_body(pb, obj->value.str_val, obj->obj_len);
-                printf("(str_val)\"%s\"\n", obj->value.str_val);
-                break;
-            case OBJ_TYPE_NIL:
-                msgpk_pack_nil(pb);
-                printf("(NULL)\n");
-                break;
-            case OBJ_TYPE_TRUE:
-                msgpk_pack_true(pb);
-                printf("(TRUE:%d)\n", obj->value.bool_val);
-                break;
-            case OBJ_TYPE_FALSE:
-                msgpk_pack_false(pb);
-                printf("(FALSE:%d)\n", obj->value.bool_val);
-                break;
-            case OBJ_TYPE_BIN:
-                msgpk_pack_bin(pb, obj->obj_len);
-                msgpk_pack_bin_body(pb, obj->value.bin_val, obj->obj_len);
-                printf("(BIN)\"%s\"\n", obj->value.bin_val);
-                break;
-            case OBJ_TYPE_FLOAT:
-                msgpk_pack_float(pb, obj->value.float_val);
-                printf("(float)%f\n", obj->value.float_val);
-                break;
-            case OBJ_TYPE_DOUBLE:
-                msgpk_pack_double(pb, obj->value.double_val);
-                printf("(double)%lf\n", obj->value.double_val);
-                break;
-            case OBJ_TYPE_POSITIVE_INT:
-                msgpk_pack_fixnum_positive(pb, obj->value.uint8_val);
-                printf("(fixInt)%u\n", obj->value.uint8_val);
-                break;
-            case OBJ_TYPE_NEGATIVE_INT:
-                msgpk_pack_fixnum_negative(pb, obj->value.int8_val);
-                printf("(fixInt)%d\n", obj->value.int8_val);
-                break;
-            case OBJ_TYPE_INT8:
-                msgpk_pack_fixInt8(pb, obj->value.int8_val);
-                printf("(int8)%d\n", obj->value.int8_val);
-                break;
-            case OBJ_TYPE_INT16:
-                msgpk_pack_fixInt16(pb, obj->value.int16_val);
-                printf("(int16)%d\n", obj->value.int16_val);
-                break;
-            case OBJ_TYPE_INT32:
-                msgpk_pack_fixInt32(pb, obj->value.int32_val);
-                printf("(int32)%d\n", obj->value.int32_val);
-                break;
-            case OBJ_TYPE_INT64:
-                msgpk_pack_fixInt64(pb, obj->value.int64_val);
-                printf("(int64)%ld\n", obj->value.int64_val);
-                break;
-            case OBJ_TYPE_UINT8:
-                msgpk_pack_fixInt8_u(pb, obj->value.uint8_val);
-                printf("(uint8)%u\n", obj->value.uint8_val);
-                break;
-            case OBJ_TYPE_UINT16:
-                msgpk_pack_fixInt16_u(pb, obj->value.uint16_val); 
-                printf("(uint16)%u\n", obj->value.uint16_val);
-                break;
-            case OBJ_TYPE_UINT32:
-                msgpk_pack_fixInt32_u(pb, obj->value.uint32_val);
-                printf("(uint32)%u\n", obj->value.uint32_val);
-                break;
-            case OBJ_TYPE_UINT64:
-                msgpk_pack_fixInt64_u(pb, obj->value.uint64_val);
-                printf("(uint64)%lu\n", obj->value.uint64_val);
-                break;
-            case OBJ_TYPE_ARRAY:
-                msgpk_pack_array(pb, obj->obj_len);
-                printf("Array: %d\n", obj->obj_len);
-                break;
-            case OBJ_TYPE_MAP:
-                msgpk_pack_map(pb, obj->obj_len);
-                printf("Map: %d\n", obj->obj_len);
-                break;
-            case OBJ_TYPE_EXT:
-                msgpk_pack_ext(pb, obj->obj_len, 0x00);
-                printf("EXT: %d\n", obj->obj_len);
-                break;
-            default:
-                break;
-        }
-
-    }
-        
-    bfs_queue_destroy(&bq);
 }/*}}}*/
 
 //define

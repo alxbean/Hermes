@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/content/!svn/ver/45223/codes/c/dev/ydb2-athena/messagepack/include
+END
+messagepack.h
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/content/!svn/ver/45223/codes/c/dev/ydb2-athena/messagepack/include/messagepack.h
+END
+msgpk_packer.h
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/content/!svn/ver/45223/codes/c/dev/ydb2-athena/messagepack/include/msgpk_packer.h
+END
+msgpk_unpacker.h
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/content/!svn/ver/45223/codes/c/dev/ydb2-athena/messagepack/include/msgpk_unpacker.h
+END
+msgpk_unpacker_athena.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/content/!svn/ver/45223/codes/c/dev/ydb2-athena/messagepack/include/msgpk_unpacker_athena.h
+END
+msgpk_define.h
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/content/!svn/ver/45223/codes/c/dev/ydb2-athena/messagepack/include/msgpk_define.h
+END
+msgpk_build_tree.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/content/!svn/ver/45223/codes/c/dev/ydb2-athena/messagepack/include/msgpk_build_tree.h
+END
