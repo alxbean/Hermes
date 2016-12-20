@@ -78,6 +78,8 @@ struct msgpk_object* bfs_queue_pop(struct bfs_queue *bq){/*{{{*/
         if (NULL == bq->head)
             bq->tail = NULL;
         pthread_mutex_unlock(&bq->mutex);
-        return node->obj;
+        struct msgpk_object* obj = node->obj;
+        free(node);
+        return obj;
     }
 }/*}}}*/
