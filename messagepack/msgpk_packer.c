@@ -694,14 +694,14 @@ struct pack_buffer *msgpk_message_packer(struct msgpk_object *obj){/*{{{*/
         return pb;
 } /*}}}*/
 
-int msgpk_message_destory(struct pack_buffer *pb){
+int msgpk_message_destroy(struct pack_buffer *pb){/*{{{*/
     if (NULL == pb){
         perror("msgpk_message_destory:");
         return -1;
     }
     
     return free_pack_buffer(&pb);
-}
+}/*}}}*/
 
 void msgpk_print_hex(const ubyte_t *buf, unsigned int len){/*{{{*/
     size_t i = 0;
