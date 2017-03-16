@@ -641,6 +641,7 @@ static void msgpk_unpack_integer(struct context *ctx){/*{{{*/
             else{
                 ctx->node->key.uint64_val = uval_64;
             }
+            break;
         }
         case 0xD0:
         {
@@ -699,6 +700,7 @@ static void msgpk_unpack_integer(struct context *ctx){/*{{{*/
             else{
                 ctx->node->key.int64_val = val_64;
             }
+            break;
         }
         default:
             printf("0x%x unimplement\n", head);
