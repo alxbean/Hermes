@@ -83,35 +83,35 @@ static void pack_message_dfs(struct pack_buffer *pb, struct msgpk_object *obj){/
                 printf("(str_val)\"%s\" -> ", obj->key.str_val);
                 break;
             case OBJ_TYPE_INT8:
-                msgpk_pack_fixInt8(pb, obj->key.int8_val);
+                msgpk_pack_fix_int8(pb, obj->key.int8_val);
                 printf("(int8)%d -> ", obj->key.int8_val);
                 break;
             case OBJ_TYPE_INT16:
-                msgpk_pack_fixInt16(pb, obj->key.int16_val);
+                msgpk_pack_fix_int16(pb, obj->key.int16_val);
                 printf("(int16)%d -> ", obj->key.int16_val);
                 break;
             case OBJ_TYPE_INT32:
-                msgpk_pack_fixInt32(pb, obj->key.int32_val);
+                msgpk_pack_fix_int32(pb, obj->key.int32_val);
                 printf("(int32)%d -> ", obj->key.int32_val);
                 break;
             case OBJ_TYPE_INT64:
-                msgpk_pack_fixInt64(pb, obj->key.int64_val);
+                msgpk_pack_fix_int64(pb, obj->key.int64_val);
                 printf("(int64)%ld -> ", obj->key.int64_val);
                 break;
             case OBJ_TYPE_UINT8:
-                msgpk_pack_fixInt8_u(pb, obj->key.uint8_val);
+                msgpk_pack_fix_uint8(pb, obj->key.uint8_val);
                 printf("(uint8)%u -> ", obj->key.uint8_val);
                 break;
             case OBJ_TYPE_UINT16:
-                msgpk_pack_fixInt16_u(pb, obj->key.uint16_val); 
+                msgpk_pack_fix_uint16(pb, obj->key.uint16_val); 
                 printf("(uint16)%u -> ", obj->key.uint16_val);
                 break;
             case OBJ_TYPE_UINT32:
-                msgpk_pack_fixInt32_u(pb, obj->key.uint32_val);
+                msgpk_pack_fix_uint32(pb, obj->key.uint32_val);
                 printf("(uint32)%u -> ", obj->key.uint32_val);
                 break;
             case OBJ_TYPE_UINT64:
-                msgpk_pack_fixInt64_u(pb, obj->key.uint64_val);
+                msgpk_pack_fix_uint64(pb, obj->key.uint64_val);
                 printf("(uint64)%lu -> ", obj->key.uint64_val);
                 break;
             case OBJ_TYPE_POSITIVE_INT:
@@ -167,35 +167,35 @@ static void pack_message_dfs(struct pack_buffer *pb, struct msgpk_object *obj){/
             printf("(fixInt)%d\n", obj->value.int8_val);
             break;
         case OBJ_TYPE_INT8:
-            msgpk_pack_fixInt8(pb, obj->value.int8_val);
+            msgpk_pack_fix_int8(pb, obj->value.int8_val);
             printf("(int8)%d\n", obj->value.int8_val);
             break;
         case OBJ_TYPE_INT16:
-            msgpk_pack_fixInt16(pb, obj->value.int16_val);
+            msgpk_pack_fix_int16(pb, obj->value.int16_val);
             printf("(int16)%d\n", obj->value.int16_val);
             break;
         case OBJ_TYPE_INT32:
-            msgpk_pack_fixInt32(pb, obj->value.int32_val);
+            msgpk_pack_fix_int32(pb, obj->value.int32_val);
             printf("(int32)%d\n", obj->value.int32_val);
             break;
         case OBJ_TYPE_INT64:
-            msgpk_pack_fixInt64(pb, obj->value.int64_val);
+            msgpk_pack_fix_int64(pb, obj->value.int64_val);
             printf("(int64)%ld\n", obj->value.int64_val);
             break;
         case OBJ_TYPE_UINT8:
-            msgpk_pack_fixInt8_u(pb, obj->value.uint8_val);
+            msgpk_pack_fix_uint8(pb, obj->value.uint8_val);
             printf("(uint8)%u\n", obj->value.uint8_val);
             break;
         case OBJ_TYPE_UINT16:
-            msgpk_pack_fixInt16_u(pb, obj->value.uint16_val); 
+            msgpk_pack_fix_uint16(pb, obj->value.uint16_val); 
             printf("(uint16)%u\n", obj->value.uint16_val);
             break;
         case OBJ_TYPE_UINT32:
-            msgpk_pack_fixInt32_u(pb, obj->value.uint32_val);
+            msgpk_pack_fix_uint32(pb, obj->value.uint32_val);
             printf("(uint32)%u\n", obj->value.uint32_val);
             break;
         case OBJ_TYPE_UINT64:
-            msgpk_pack_fixInt64_u(pb, obj->value.uint64_val);
+            msgpk_pack_fix_uint64(pb, obj->value.uint64_val);
             printf("(uint64)%lu\n", obj->value.uint64_val);
             break;
         case OBJ_TYPE_ARRAY:
@@ -251,35 +251,35 @@ static void pack_message(struct pack_buffer *pb, struct msgpk_object *obj){/*{{{
                     printf("(str_val)\"%s\" -> ", obj->key.str_val);
                     break;
                 case OBJ_TYPE_INT8:
-                    msgpk_pack_fixInt8(pb, obj->key.int8_val);
+                    msgpk_pack_fix_int8(pb, obj->key.int8_val);
                     printf("(int8)%d -> ", obj->key.int8_val);
                     break;
                 case OBJ_TYPE_INT16:
-                    msgpk_pack_fixInt16(pb, obj->key.int16_val);
+                    msgpk_pack_fix_int16(pb, obj->key.int16_val);
                     printf("(int16)%d -> ", obj->key.int16_val);
                     break;
                 case OBJ_TYPE_INT32:
-                    msgpk_pack_fixInt32(pb, obj->key.int32_val);
+                    msgpk_pack_fix_int32(pb, obj->key.int32_val);
                     printf("(int32)%d -> ", obj->key.int32_val);
                     break;
                 case OBJ_TYPE_INT64:
-                    msgpk_pack_fixInt64(pb, obj->key.int64_val);
+                    msgpk_pack_fix_int64(pb, obj->key.int64_val);
                     printf("(int64)%ld -> ", obj->key.int64_val);
                     break;
                 case OBJ_TYPE_UINT8:
-                    msgpk_pack_fixInt8_u(pb, obj->key.uint8_val);
+                    msgpk_pack_fix_uint8(pb, obj->key.uint8_val);
                     printf("(uint8)%u -> ", obj->key.uint8_val);
                     break;
                 case OBJ_TYPE_UINT16:
-                    msgpk_pack_fixInt16_u(pb, obj->key.uint16_val); 
+                    msgpk_pack_fix_uint16(pb, obj->key.uint16_val); 
                     printf("(uint16)%u -> ", obj->key.uint16_val);
                     break;
                 case OBJ_TYPE_UINT32:
-                    msgpk_pack_fixInt32_u(pb, obj->key.uint32_val);
+                    msgpk_pack_fix_uint32(pb, obj->key.uint32_val);
                     printf("(uint32)%u -> ", obj->key.uint32_val);
                     break;
                 case OBJ_TYPE_UINT64:
-                    msgpk_pack_fixInt64_u(pb, obj->key.uint64_val);
+                    msgpk_pack_fix_uint64(pb, obj->key.uint64_val);
                     printf("(uint64)%lu -> ", obj->key.uint64_val);
                     break;
                 case OBJ_TYPE_POSITIVE_INT:
@@ -335,35 +335,35 @@ static void pack_message(struct pack_buffer *pb, struct msgpk_object *obj){/*{{{
                 printf("(fixInt)%d\n", obj->value.int8_val);
                 break;
             case OBJ_TYPE_INT8:
-                msgpk_pack_fixInt8(pb, obj->value.int8_val);
+                msgpk_pack_fix_int8(pb, obj->value.int8_val);
                 printf("(int8)%d\n", obj->value.int8_val);
                 break;
             case OBJ_TYPE_INT16:
-                msgpk_pack_fixInt16(pb, obj->value.int16_val);
+                msgpk_pack_fix_int16(pb, obj->value.int16_val);
                 printf("(int16)%d\n", obj->value.int16_val);
                 break;
             case OBJ_TYPE_INT32:
-                msgpk_pack_fixInt32(pb, obj->value.int32_val);
+                msgpk_pack_fix_int32(pb, obj->value.int32_val);
                 printf("(int32)%d\n", obj->value.int32_val);
                 break;
             case OBJ_TYPE_INT64:
-                msgpk_pack_fixInt64(pb, obj->value.int64_val);
+                msgpk_pack_fix_int64(pb, obj->value.int64_val);
                 printf("(int64)%ld\n", obj->value.int64_val);
                 break;
             case OBJ_TYPE_UINT8:
-                msgpk_pack_fixInt8_u(pb, obj->value.uint8_val);
+                msgpk_pack_fix_uint8(pb, obj->value.uint8_val);
                 printf("(uint8)%u\n", obj->value.uint8_val);
                 break;
             case OBJ_TYPE_UINT16:
-                msgpk_pack_fixInt16_u(pb, obj->value.uint16_val); 
+                msgpk_pack_fix_uint16(pb, obj->value.uint16_val); 
                 printf("(uint16)%u\n", obj->value.uint16_val);
                 break;
             case OBJ_TYPE_UINT32:
-                msgpk_pack_fixInt32_u(pb, obj->value.uint32_val);
+                msgpk_pack_fix_uint32(pb, obj->value.uint32_val);
                 printf("(uint32)%u\n", obj->value.uint32_val);
                 break;
             case OBJ_TYPE_UINT64:
-                msgpk_pack_fixInt64_u(pb, obj->value.uint64_val);
+                msgpk_pack_fix_uint64(pb, obj->value.uint64_val);
                 printf("(uint64)%lu\n", obj->value.uint64_val);
                 break;
             case OBJ_TYPE_ARRAY:
@@ -427,12 +427,12 @@ void msgpk_pack_fixnum_negative(struct pack_buffer *pb, int8_t d){/*{{{*/
     pack_append_buffer(pb, &TAKE8_8(d), 1);
 }/*}}}*/
 
-void msgpk_pack_fixInt8_u(struct pack_buffer *pb, uint8_t d){/*{{{*/
+void msgpk_pack_fix_uint8(struct pack_buffer *pb, uint8_t d){/*{{{*/
     ubyte_t buf[2] = {0xcc, TAKE8_8(d)};
     pack_append_buffer(pb, buf, 2);
 }/*}}}*/
 
-void msgpk_pack_fixInt16_u(struct pack_buffer *pb, uint16_t d){/*{{{*/
+void msgpk_pack_fix_uint16(struct pack_buffer *pb, uint16_t d){/*{{{*/
     ubyte_t buf[3];
     buf[0] = 0xcd;
     buf[1] = ((ubyte_t *)&d)[1];
@@ -440,7 +440,7 @@ void msgpk_pack_fixInt16_u(struct pack_buffer *pb, uint16_t d){/*{{{*/
     pack_append_buffer(pb, buf, 3);
 }/*}}}*/
 
-void msgpk_pack_fixInt32_u(struct pack_buffer *pb, uint32_t d){/*{{{*/
+void msgpk_pack_fix_uint32(struct pack_buffer *pb, uint32_t d){/*{{{*/
     ubyte_t buf[5];
     buf[0] = 0xce;
     buf[1] = ((ubyte_t *)&d)[3];
@@ -450,9 +450,9 @@ void msgpk_pack_fixInt32_u(struct pack_buffer *pb, uint32_t d){/*{{{*/
     pack_append_buffer(pb, buf, 5);
 }/*}}}*/
 
-void msgpk_pack_fixInt64_u(struct pack_buffer *pb, uint64_t d){/*{{{*/
+void msgpk_pack_fix_uint64(struct pack_buffer *pb, uint64_t d){/*{{{*/
     ubyte_t buf[9];
-    buf[0] = 0xce;
+    buf[0] = 0xcf;
     buf[1] = ((ubyte_t *)&d)[7];
     buf[2] = ((ubyte_t *)&d)[6];
     buf[3] = ((ubyte_t *)&d)[5];
@@ -464,12 +464,12 @@ void msgpk_pack_fixInt64_u(struct pack_buffer *pb, uint64_t d){/*{{{*/
     pack_append_buffer(pb, buf, 9);
 }/*}}}*/
 
-void msgpk_pack_fixInt8(struct pack_buffer *pb, int8_t d){/*{{{*/
+void msgpk_pack_fix_int8(struct pack_buffer *pb, int8_t d){/*{{{*/
     ubyte_t buf[2] = {0xd0, TAKE8_8(d)};
     pack_append_buffer(pb, buf, 2);
 }/*}}}*/
 
-void msgpk_pack_fixInt16(struct pack_buffer *pb, int16_t d){/*{{{*/
+void msgpk_pack_fix_int16(struct pack_buffer *pb, int16_t d){/*{{{*/
     ubyte_t buf[3];
     buf[0] = 0xd1;
     buf[1] = ((ubyte_t *)&d)[1];
@@ -477,7 +477,7 @@ void msgpk_pack_fixInt16(struct pack_buffer *pb, int16_t d){/*{{{*/
     pack_append_buffer(pb, buf, 3);
 }/*}}}*/
 
-void msgpk_pack_fixInt32(struct pack_buffer *pb, int32_t d){/*{{{*/
+void msgpk_pack_fix_int32(struct pack_buffer *pb, int32_t d){/*{{{*/
     ubyte_t buf[5];
     buf[0] = 0xd2;
     buf[1] = ((ubyte_t *)&d)[3];
@@ -487,7 +487,7 @@ void msgpk_pack_fixInt32(struct pack_buffer *pb, int32_t d){/*{{{*/
     pack_append_buffer(pb, buf, 5);
 }/*}}}*/
 
-void msgpk_pack_fixInt64(struct pack_buffer *pb, int64_t d){/*{{{*/
+void msgpk_pack_fix_int64(struct pack_buffer *pb, int64_t d){/*{{{*/
     ubyte_t buf[9];
     buf[0] = 0xd3;
     buf[1] = ((ubyte_t *)&d)[7];
