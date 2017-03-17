@@ -10,7 +10,6 @@
 #include "msgpk_common.h"
 #include "msgpk_define.h"
 
-
 //free tree bfs
 
 struct bfs_queue* bfs_queue_new(){/*{{{*/
